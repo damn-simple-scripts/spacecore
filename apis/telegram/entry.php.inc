@@ -101,8 +101,30 @@ class API_TELEGRAM
         $result = curl_exec($ch);
         curl_close($ch);
 
-        error_log($this->classname . ":getFile: $result");
+        $result_arr = json_decode($result, true);
+
+        if($result_arr['ok'] == 'true')
+        {
+            $resource_location = $config['download_endpoint'] . $result_arr['result']['file_path'];
+            $resource_extension = pathinfo($resource_location, PATHINFO_EXTENSION);
+
+            if(in_array($resource_extension, $config['allowed_photo_extensions']))
+            {
+                file_put_contents($destination . '.' . $resource_extension, file_get_contents($resource_location));
+                error_log($this->classname . ":getFile: $file_id saved to $destination . '.' . $resource_extension");
+            }
+            else
+            {
+                error_log($this->classname . ":getFile: failed (extension $resource_extension not whitelisted, file_id $file_id)");
+            }
+        }
+        else
+        {
+            error_log($this->classname . ":getFile: failed (whoops). Trace: $result");
+        }
+
     }
+    
 }
 
 ?>

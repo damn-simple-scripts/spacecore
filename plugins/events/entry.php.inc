@@ -41,7 +41,14 @@ class PLUGIN_EVENTS
         // so the largest file is at the end of the array
         $photo_data = end($GLOBALS['layer7_stanza']['message']['photo']);
         error_log($this->classname . ": found image locator" . $photo_data['file_id'] . " (size:" . $photo_data['file_size'] . ")");
-        $this->object_broker->instance['api_telegram']->download_resource($photo_data['file_id'], null);
+
+        // we need an area to dump the files
+        if(!is_dir('photos')) mkdir('photos');
+
+        // if an index exists, fine. If not, create one to prohibit leaks due to directory listings.
+        touch('photos/index.html');
+
+        $this->object_broker->instance['api_telegram']->download_resource($photo_data['file_id'], 'photos/' . time() . '_' . md5($photo_data['file_id']));
     }
 
 }

@@ -24,7 +24,8 @@ class CORE_PERSIST
 
     public function __destruct()
     {
-
+        // get rid of the database resource in order to avoid race conditions due to garbage collection
+        $this->db->close();
     }
 
 

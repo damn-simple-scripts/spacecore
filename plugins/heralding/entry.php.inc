@@ -128,7 +128,7 @@ class PLUGIN_HERALDING
                         $this->object_broker->instance['api_telegram']->send_message($privateChannel, $message);
 
                         // Persist the state
-                        $this->object_broker->instance['core_persist']->store('heralding.state', 'membersonly');
+                        $this->object_broker->instance['core_persist']->store('heralding.state', 'open');
                         $this->object_broker->instance['core_persist']->store('heralding.owner', $senderid);
                     }
                     else

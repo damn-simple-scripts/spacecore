@@ -34,6 +34,12 @@ class CORE_PERSIST
         // Prepare the database
         $this->db = new SQLite3($this->classname . '.sqlite3', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 
+        // some plugins may do things that take longer but keep the sqlite connection open, so we increase the timeout¿
+        $this->db->busyTimeout(10000);
+
+        // better concurrency? I'm in!
+        $this->db->exec('PRAGMA journal_mode=WAL;');
+
         // Prepare the table structure
         $this->db->query('
             CREATE TABLE IF NOT EXISTS "data" (

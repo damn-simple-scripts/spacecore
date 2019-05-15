@@ -18,12 +18,12 @@ class PLUGIN_HERALDING
         $object_broker->plugins[] = $this->classname;
         error_log($this->classname . ": starting up");
 
-        $this->object_broker->instance['api_routing']->register("startup", $this->classname);
-        $this->object_broker->instance['api_routing']->register("membersonly", $this->classname);
-        $this->object_broker->instance['api_routing']->register("shutdown", $this->classname);
-        $this->object_broker->instance['api_routing']->register("handover", $this->classname);
-        $this->object_broker->instance['api_routing']->register("takeover", $this->classname);
-        $this->object_broker->instance['api_routing']->register("abort", $this->classname);
+        $this->object_broker->instance['api_routing']->register("startup", $this->classname, "Boot the space for all audiences");
+        $this->object_broker->instance['api_routing']->register("membersonly", $this->classname, "Boot the space for members only");
+        $this->object_broker->instance['api_routing']->register("shutdown", $this->classname, "Shut down the space");
+        $this->object_broker->instance['api_routing']->register("handover", $this->classname, "Offer to handover the space to another Keymember");
+        $this->object_broker->instance['api_routing']->register("takeover", $this->classname, "Take over the space from another Keymember");
+        $this->object_broker->instance['api_routing']->register("abort", $this->classname, "Abort an open Handover");
     }
 
 

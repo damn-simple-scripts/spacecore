@@ -18,7 +18,13 @@ class PLUGIN_SYSTEM
         $object_broker->plugins[] = $this->classname;
         error_log($this->classname . ": starting up");
 
-        $this->object_broker->instance['api_routing']->register("system", $this->classname);
+        $this->object_broker->instance['api_routing']->register("system", $this->classname, "System related commands");
+        $this->object_broker->instance['api_routing']->helptext("system", "", "System related commands");
+        $this->object_broker->instance['api_routing']->helptext("system", "commands", "List all commands currently available");
+        $this->object_broker->instance['api_routing']->helptext("system", "whoami", "Show user-related metadata");
+        $this->object_broker->instance['api_routing']->helptext("system", "permissions", "List all permissions associated with the user");
+        $this->object_broker->instance['api_routing']->helptext("system", "whitelist (register/remove) UID (to/from) PLUGIN_NAME", "Add/remove a user to/from a plugin in whitelist mode");
+        $this->object_broker->instance['api_routing']->helptext("system", "blacklist (register/remove) UID (to/from) PLUGIN_NAME", "Add/remove a user to/from a plugin in blacklist mode");
     }
 
 
@@ -104,6 +110,30 @@ class PLUGIN_SYSTEM
                     }
                     $message = rtrim($message, ',') . "\n\n";
                 }
+                $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
+                break;
+
+            case "help":
+                // give hints on features and usage
+                $message = "";
+                foreach($this->object_broker->instance['api_routing']->get_help_map() as $hook_trigger => $help_arr)
+                {
+                    foreach($help_arr as $modifier => $helptext)
+                    {
+                        if(!$modifier)
+                        {
+                            $message .= "<b>/$hook_trigger</b>\n<i>$helptext</i>\n\n";
+                        }
+                        else
+                        {
+                            $message .= "    <b>&#746; $modifier</b>\n    <i>$helptext</i>\n\n";
+                        }
+                    }
+
+                }
+                $message .= "\n\n";
+
+                error_log("SENDING: " . $message);
                 $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
                 break;
 

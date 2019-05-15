@@ -8,6 +8,7 @@ class API_ROUTING
 {
     private $object_broker;
     private $hooks;
+    private $helptexts;
     private $classname;
 
     public function __construct($object_broker)
@@ -19,6 +20,7 @@ class API_ROUTING
         error_log($this->classname .  ": starting up");
 
         $this->hooks = [];
+        $this->helptexts = [];
     }
 
 
@@ -108,18 +110,30 @@ class API_ROUTING
             }
             else
             {
-                error_log($this->classname . ": no class registered to trigger: $trigger --> ignoring");
+                $payload = "Unknown command. Use '/system help' to get more information.";
+                $this->object_broker->instance['api_telegram']->send_message($senderid, $payload);
+                error_log($this->classname . ": no class registered to trigger: $trigger --> sending help text");
             }
+        }
+        else
+        {
+            // that's no command. This branch could facilitate some chatbot feature.
+            error_log($this->classname . ": no chatmode available yet --> ignoring");
         }
     }
 
 
-    public function register($trigger, $classname)
+    public function register($trigger, $classname, $description = NULL)
     {
         $this->hooks[$trigger] = $classname;
         error_log($this->classname . ": registered class $classname on trigger $trigger");
     }
 
+    public function helptext($trigger, $modifier, $description = NULL)
+    {
+        $this->helptexts[$trigger][$modifier] = $description;
+        error_log($this->classname . ": registered helptext for trigger $trigger");
+    }
 
     public function resolve($trigger)
     {
@@ -147,6 +161,12 @@ class API_ROUTING
         }
 
         return $map;
+    }
+
+    public function get_help_map()
+    {
+        // return a map of all help texts organized by classname as associative array
+        return $this->helptexts;
     }
 
 

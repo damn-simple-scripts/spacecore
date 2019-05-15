@@ -18,8 +18,10 @@ class PLUGIN_ECHO
         $object_broker->plugins[] = $this->classname;
         error_log($this->classname . ": starting up");
 
-        $this->object_broker->instance['api_routing']->register("echo", $this->classname);
-        $this->object_broker->instance['api_routing']->register("whisper", $this->classname);
+        $this->object_broker->instance['api_routing']->register("echo", $this->classname, "Repeats the received message body back to the current channel");
+        $this->object_broker->instance['api_routing']->register("whisper", $this->classname, "Repeats the received message body to the sender via PM");
+        $this->object_broker->instance['api_routing']->helptext("echo", "", "Repeats the received message body back to the current channel");
+        $this->object_broker->instance['api_routing']->helptext("whisper", "", "Repeats the received message body to the sender via PM");
     }
 
 

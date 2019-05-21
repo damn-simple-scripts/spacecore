@@ -25,6 +25,7 @@ class PLUGIN_SYSTEM
         $this->object_broker->instance['api_routing']->helptext("system", "permissions", "List all permissions associated with the user");
         $this->object_broker->instance['api_routing']->helptext("system", "whitelist (register/remove) UID (to/from) PLUGIN_NAME", "Add/remove a user to/from a plugin in whitelist mode");
         $this->object_broker->instance['api_routing']->helptext("system", "blacklist (register/remove) UID (to/from) PLUGIN_NAME", "Add/remove a user to/from a plugin in blacklist mode");
+        $this->object_broker->instance['api_routing']->helptext("system", "help", "The information you're reading at the moment");
     }
 
 

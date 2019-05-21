@@ -4,24 +4,20 @@
  * This program is free software licensed under the terms of the GNU General Public License v3 (GPLv3).
  */
 
-//ini_set("log_errors", 1);
-//ini_set("error_log", "php-error.log");
-
-// HERE BE DRAGONS - most of this file will be moved to the database,
-// this includes sensitive information that should not go to source control
-// therefore this is just a placeholder for now
-
 global $config;
 $config['bot_token'] = '';
 $config['api_endpoint'] = 'https://api.telegram.org/bot' . $config['bot_token'] . '/';
 $config['download_endpoint'] = 'https://api.telegram.org/file/bot' . $config['bot_token'] . '/';
+$config['allowed_photo_extensions'] = array('jpg', 'png', 'gif', 'jpeg', 'tiff');
 
 $config['publicChannelID'] = "";
 $config['privateChannelID'] = "";
 $config['keymemberChannelID'] = "";
 
-$config['admins'] = array('0' => 'foo');
+$config['admins'] = array('999999999' => 'admin');
 
-$config['error_log'] = "spacecore.log";
+$config['error_log'] = "debug.log";
+$config['webapi_level'] = 2;
+$config['webapi_token'] = '';
 
 ?>

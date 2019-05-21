@@ -1,0 +1,4 @@
+RewriteEngine On
+RewriteRule ^opendata$ spacecore.php [L]
+RewriteRule ^opendata/(.*)$ spacecore.php?token=$1
+RewriteRule ^telegram/(.*)$ spacecore.php?token=$1

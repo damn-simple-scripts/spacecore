@@ -4,7 +4,7 @@
  * This program is free software licensed under the terms of the GNU General Public License v3 (GPLv3).
  */
 
-require("config.php.inc");
+require("config.inc.php");
 
 error_reporting(E_ALL);
 ini_set('display_errors', 'on');

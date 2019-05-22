@@ -15,7 +15,7 @@ error_log("WAKEUP");
 
 //error_log(print_r($_SERVER, true));
 
-include_once('object_broker.php.inc');
+include_once('object_broker.inc.php');
 $object_broker = new OBJECT_BROKER();
 
 
@@ -24,7 +24,7 @@ $classes = array_filter(glob('core/*'), 'is_dir');
 foreach($classes as $class_src)
 {
     $class_dir = basename($class_src);
-    include_once('core/' . $class_dir . '/entry.php.inc');
+    include_once('core/' . $class_dir . '/init.inc.php');
     $core_classname = 'CORE_'.strtoupper($class_dir);
     $object_broker->instance['core_' . $class_dir] = new $core_classname($object_broker);
     error_log("class $core_classname loaded");
@@ -36,7 +36,7 @@ $apis = array_filter(glob('apis/*'), 'is_dir');
 foreach($apis as $api_src)
 {
     $api_dir = basename($api_src);
-    include_once('apis/' . $api_dir . '/entry.php.inc');
+    include_once('apis/' . $api_dir . '/init.inc.php');
     $api_classname = 'API_'.strtoupper($api_dir);
     $object_broker->instance['api_' . $api_dir] = new $api_classname($object_broker);
     error_log("class $api_classname loaded");
@@ -48,7 +48,7 @@ $plugins = array_filter(glob('plugins/*'), 'is_dir');
 foreach($plugins as $plugin_src)
 {
     $plugin_dir = basename($plugin_src);
-    include_once('plugins/' . $plugin_dir . '/entry.php.inc');
+    include_once('plugins/' . $plugin_dir . '/init.inc.php');
     $plugin_classname = 'PLUGIN_'.strtoupper($plugin_dir);
     $object_broker->instance['plugin_' . $plugin_dir] = new $plugin_classname($object_broker);
     error_log("class $plugin_classname loaded");

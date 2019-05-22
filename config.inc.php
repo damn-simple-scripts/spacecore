@@ -14,9 +14,9 @@ $config['publicChannelID'] = "";
 $config['privateChannelID'] = "";
 $config['keymemberChannelID'] = "";
 
-$config['admins'] = array('999999999' => 'admin');
+$config['admins'] = array('' => '');
 
-$config['error_log'] = "debug.log";
+$config['error_log'] = "core.log";
 $config['webapi_level'] = 2;
 $config['webapi_token'] = '';
 

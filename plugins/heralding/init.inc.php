@@ -76,9 +76,13 @@ class PLUGIN_HERALDING
             $spacetransfer = '';
 
             $this->object_broker->instance['core_persist']->store('heralding.state', $spacestate);
+            $this->object_broker->instance['core_persist']->store('heralding.msg', '');
             $this->object_broker->instance['core_persist']->store('heralding.owner', '');
             $this->object_broker->instance['core_persist']->store('heralding.owner.gecos', '');
             $this->object_broker->instance['core_persist']->store('heralding.transfer', '');
+            $this->object_broker->instance['core_persist']->store('heralding.lastchange.ts', '');
+            $this->object_broker->instance['core_persist']->store('heralding.lastchange.gecos', '');
+
         }
 
         switch($trigger)
@@ -98,18 +102,22 @@ class PLUGIN_HERALDING
                         // Heralding to the public channel
                         $message = "<b>The Vault is now open</b>\n Hosted by: $sendergecos, estimated shutdown: $payload";
                         $this->object_broker->instance['api_telegram']->send_message($publicChannel, $message);
+                        $this->object_broker->instance['core_persist']->store('heralding.msg', 'Estimated shutdown: ' . $payload);
                     }
                     else
                     {
                         // Heralding to the public channel
                         $message = "<b>The Vault is now open</b>\n Hosted by: $sendergecos";
                         $this->object_broker->instance['api_telegram']->send_message($publicChannel, $message);
+                        $this->object_broker->instance['core_persist']->store('heralding.msg', 'No estimated shutdown time');
                     }
 
                     // Persist the state
                     $this->object_broker->instance['core_persist']->store('heralding.state', 'open');
                     $this->object_broker->instance['core_persist']->store('heralding.owner', $senderid);
                     $this->object_broker->instance['core_persist']->store('heralding.owner.gecos', $sendergecos);
+                    $this->object_broker->instance['core_persist']->store('heralding.lastchange.ts', time());
+                    $this->object_broker->instance['core_persist']->store('heralding.lastchange.gecos', $sendergecos);
                 }
                 elseif($spacestate == 'membersonly')
                 {
@@ -130,6 +138,8 @@ class PLUGIN_HERALDING
                         // Persist the state
                         $this->object_broker->instance['core_persist']->store('heralding.state', 'open');
                         $this->object_broker->instance['core_persist']->store('heralding.owner', $senderid);
+                        $this->object_broker->instance['core_persist']->store('heralding.lastchange.ts', time());
+                        $this->object_broker->instance['core_persist']->store('heralding.lastchange.gecos', $sendergecos);
                     }
                     else
                     {
@@ -162,14 +172,27 @@ class PLUGIN_HERALDING
                     $message = "<b>Success!</b>\n The space state is now <b>open for members only</b>!";
                     $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
 
-                    // Heralding to the private channel
-                    $message = "<b>The Vault is now open to members only</b>\n Hosted by: $sendergecos";
+                    if($payload)
+                    {
+                        // Heralding to the private channel
+                        $message = "<b>The Vault is now open to members only</b>\n Hosted by: $sendergecos, estimated shutdown: $payload";
+                        $this->object_broker->instance['core_persist']->store('heralding.msg', 'Estimated shutdown: ' . $payload);
+                    }
+                    else
+                    {
+                        // Heralding to the private channel
+                        $message = "<b>The Vault is now open to members only</b>\n Hosted by: $sendergecos";
+                        $this->object_broker->instance['core_persist']->store('heralding.msg', 'No estimated shutdown time');
+                    }
                     $this->object_broker->instance['api_telegram']->send_message($privateChannel, $message);
 
                     // Persist the state
                     $this->object_broker->instance['core_persist']->store('heralding.state', 'membersonly');
                     $this->object_broker->instance['core_persist']->store('heralding.owner', $senderid);
                     $this->object_broker->instance['core_persist']->store('heralding.owner.gecos', $sendergecos);
+                    $this->object_broker->instance['core_persist']->store('heralding.lastchange.ts', time());
+                    $this->object_broker->instance['core_persist']->store('heralding.lastchange.gecos', $sendergecos);
+                    $this->object_broker->instance['core_persist']->store('heralding.msg', 'No estimated shutdown time');
 
                 }
                 elseif($spacestate == 'membersonly')
@@ -186,16 +209,34 @@ class PLUGIN_HERALDING
                         $message = "<b>Success!</b>\n The space state is now <b>open for members only</b>!";
                         $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
 
-                        // Heralding to the private channel
-                        $message = "<b>The Vault is now open to members only</b>\n Hosted by: $sendergecos";
+                        if($payload)
+                        {
+                            // Heralding to the private channel
+                            $message = "<b>The Vault has switched to members only</b>\n New estimated shutdown: $payload";
+                            $this->object_broker->instance['core_persist']->store('heralding.msg', 'Estimated shutdown: ' . $payload);
+                        }
+                        else
+                        {
+                            // Heralding to the private channel
+                            $message = "<b>The Vault has switched to members only</b>\n Hosted by: $sendergecos";
+                        }
                         $this->object_broker->instance['api_telegram']->send_message($privateChannel, $message);
 
                         // Heralding to the public channel
                         $message = "<b>The Vault is now closed</b>\n See you soon";
                         $this->object_broker->instance['api_telegram']->send_message($publicChannel, $message);
 
+                        // Write data to heat file
+                        $close_timestamp = time();
+                        $open_timestamp = $this->object_broker->instance['core_persist']->retrieve('heralding.lastchange.ts');
+                        $open_duration = $close_timestamp - $open_timestamp;
+                        $heat_line = "$open_timestamp,$close_timestamp,$open_duration,$spaceowner,$spaceownergecos\n";
+                        file_put_contents('heralding.data', $heat_line, FILE_APPEND | LOCK_EX);
+
                         // Persist the state
                         $this->object_broker->instance['core_persist']->store('heralding.state', 'membersonly');
+                        $this->object_broker->instance['core_persist']->store('heralding.lastchange.ts', time());
+                        $this->object_broker->instance['core_persist']->store('heralding.lastchange.gecos', $sendergecos);
                     }
                     else
                     {
@@ -207,7 +248,7 @@ class PLUGIN_HERALDING
                 else
                 {
                     // Command not applicable
-                    $message = "<b>Sorry!</b>\n you can't start the space, since it's currently flagged as $spacestate";
+                    $message = "<b>Sorry!</b>\n you can't boot the space, since it's currently flagged as $spacestate";
                     $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
                 }
                 break;
@@ -238,6 +279,10 @@ class PLUGIN_HERALDING
                         $this->object_broker->instance['core_persist']->store('heralding.state', 'closed');
                         $this->object_broker->instance['core_persist']->store('heralding.owner', '');
                         $this->object_broker->instance['core_persist']->store('heralding.transfer', '');
+                        $this->object_broker->instance['core_persist']->store('heralding.lastchange.ts', time());
+                        $this->object_broker->instance['core_persist']->store('heralding.lastchange.gecos', $sendergecos);
+                        $this->object_broker->instance['core_persist']->store('heralding.msg', '');
+
                     }
                     else
                     {
@@ -258,10 +303,20 @@ class PLUGIN_HERALDING
                         $message = "<b>The Vault is now closed</b>\nSee you soon";
                         $this->object_broker->instance['api_telegram']->send_message($publicChannel, $message);
 
+                        // Write data to heat file
+                        $close_timestamp = time();
+                        $open_timestamp = $this->object_broker->instance['core_persist']->retrieve('heralding.lastchange.ts');
+                        $open_duration = $close_timestamp - $open_timestamp;
+                        $heat_line = "$open_timestamp,$close_timestamp,$open_duration,$spaceowner,$spaceownergecos\n";
+                        file_put_contents('heralding.data', $heat_line, FILE_APPEND | LOCK_EX);
+
                         // Persist the state
                         $this->object_broker->instance['core_persist']->store('heralding.state', 'closed');
                         $this->object_broker->instance['core_persist']->store('heralding.owner', '');
                         $this->object_broker->instance['core_persist']->store('heralding.transfer', '');
+                        $this->object_broker->instance['core_persist']->store('heralding.lastchange.ts', $close_timestamp);
+                        $this->object_broker->instance['core_persist']->store('heralding.lastchange.gecos', $sendergecos);
+                        $this->object_broker->instance['core_persist']->store('heralding.msg', '');
                     }
                     else
                     {
@@ -328,15 +383,30 @@ class PLUGIN_HERALDING
                         $message = "<b>TRANSFER: READY PLAYER TWO</b>\nYou are now released from your space shift";
                         $this->object_broker->instance['api_telegram']->send_message($spaceowner, $message);
 
-                        // Heralding to the keymember channel
-                        $message = "<b>TRANSFER: READY PLAYER TWO</b>\n$sendergecos accepted to continue this space shift";
-                        $this->object_broker->instance['api_telegram']->send_message($keymemberChannel, $message);
+                        if($payload)
+                        {
+                            // Heralding to the keymember channel
+                            $message = "<b>TRANSFER: READY PLAYER TWO</b>\n$sendergecos accepted to continue this space shift until $payload";
+                            $this->object_broker->instance['api_telegram']->send_message($keymemberChannel, $message);
+
+                            // Heralding to the public channel, since we extended the opening time
+                            $message = "The current session is now hosted by: $sendergecos, new estimated shutdown: $payload";
+                            $this->object_broker->instance['api_telegram']->send_message($publicChannel, $message);
+                            $this->object_broker->instance['core_persist']->store('heralding.msg', 'Estimated shutdown: ' . $payload);
+                        }
+                        else
+                        {
+                            // Heralding to the keymember channel
+                            $message = "<b>TRANSFER: READY PLAYER TWO</b>\n$sendergecos accepted to continue this space shift";
+                            $this->object_broker->instance['api_telegram']->send_message($keymemberChannel, $message);
+                        }
 
                         // Persist the transfer state
                         $this->object_broker->instance['core_persist']->store('heralding.transfer', '');
                         $this->object_broker->instance['core_persist']->store('heralding.owner', $senderid);
                         $this->object_broker->instance['core_persist']->store('heralding.owner.gecos', $sendergecos);
-
+                        $this->object_broker->instance['core_persist']->store('heralding.lastchange.ts', time());
+                        $this->object_broker->instance['core_persist']->store('heralding.lastchange.gecos', $sendergecos);
                     }
                     else
                     {
@@ -384,7 +454,7 @@ class PLUGIN_HERALDING
                     else
                     {
                         // Feedback to the user: Not hovering
-                        $message = "<b>Failed!</b>\n The space is currently not being transferred";
+                        $message = "<b>Failed!</b>\n The space is currently not subject to being transferred";
                         $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
                     }
                 }

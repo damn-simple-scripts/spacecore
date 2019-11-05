@@ -1,4 +1,30 @@
 RewriteEngine On
 RewriteRule ^opendata$ spacecore.php [L]
+RewriteRule ^opendata/(.*)/(.*)$ spacecore.php?token=$1&filter=$2
 RewriteRule ^opendata/(.*)$ spacecore.php?token=$1
 RewriteRule ^telegram/(.*)$ spacecore.php?token=$1
+
+<Files ./spacecore.log>
+Order Allow,Deny
+Deny from all
+</Files>
+
+<Files *.php.inc>
+Order Allow,Deny
+Deny from all
+</Files>
+
+<Files ./core_persist.sqlite3>
+Order Allow,Deny
+Deny from all
+</Files>
+
+<Files ./mqtt.data>
+Order Allow,Deny
+Deny from all
+</Files>
+
+<Files ./heralding.data>
+Order Allow,Deny
+Deny from all
+</Files>

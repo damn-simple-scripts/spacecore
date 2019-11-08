@@ -80,8 +80,8 @@ else
         error_log("telegram:receiveMessage: VALID JSON DECODED: '$layer6_stanza'");
 
         // Is the sender legit?
-        if (!isset($_GET['token']) || $_GET['token'] != $config['bot_token']) {
-            error_log("telegram:SenderAuthentication: Invalid token: " . $_GET['token']);
+        if (!isset($_GET['token']) || (isset($_GET['token']) && $_GET['token'] != $config['bot_token'])) {
+            error_log("telegram:SenderAuthentication: Invalid token: " . ( isset($_GET['token']) ? $_GET['token'] : 'NONE' ) );
             exit;
         }
 

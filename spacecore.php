@@ -309,7 +309,7 @@ else
         ];
 
         // Let's deliver some data ...
-        if(strtolower($_GET['token']) == 'spaceapi') {
+        if(isset($_GET['token']) && strtolower($_GET['token']) == 'spaceapi') {
             if(isset($_GET['filter']) && $_GET['filter'] != "") {
                 // -- that's the proper way of retrieving data, using SpaceAPI (https://spaceapi.io)
                 $spaceapi_data_filter['api'] = $spaceapi_data['api'];

@@ -48,6 +48,24 @@ class API_TELEGRAM
         curl_close($ch);
 
         error_log($this->classname . ":sendMessage: $result");
+        
+        $result_arr = json_decode($result, true);
+        if($result_arr == null)
+        {
+            error_log($this->classname . ":sendMessage: response was null");
+            return false;
+        }
+        if($result_arr['ok'] == 'true')
+        {
+            if(
+                array_key_exists("result", $result_arr) &&
+                array_key_exists("message_id", $result_arr["result"])
+            ){
+                return $result_arr['result']['message_id'];
+            }
+        }else{
+            return false;
+        }
     }
 
 

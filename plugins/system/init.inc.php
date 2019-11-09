@@ -23,7 +23,7 @@ class PLUGIN_SYSTEM
         $this->object_broker->instance['api_routing']->helptext("system", "commands", "List all commands currently available");
         $this->object_broker->instance['api_routing']->helptext("system", "whoami", "Show user-related metadata");
         $this->object_broker->instance['api_routing']->helptext("system", "permissions", "List all permissions associated with the user");
-        $this->object_broker->instance['api_routing']->helptext("system", "whitelist (register/remove) UID (to/from) PLUGIN_NAME", "Add/remove a user to/from a plugin in whitelist mode");
+        $this->object_broker->instance['api_routing']->helptext("system", "whitelist (register/remove) UID PLUGIN_NAME", "Add/remove a user to/from a plugin in whitelist mode");
         $this->object_broker->instance['api_routing']->helptext("system", "blacklist (register/remove) UID (to/from) PLUGIN_NAME", "Add/remove a user to/from a plugin in blacklist mode");
         $this->object_broker->instance['api_routing']->helptext("system", "help", "The information you're reading at the moment");
     }
@@ -158,7 +158,7 @@ class PLUGIN_SYSTEM
                     $payload_args = explode(' ', $payload);
                     $whitelist_command = $payload_args[1];
                     $whitelist_user = $payload_args[2];
-                    $whitelist_class = $payload_args[4];
+                    $whitelist_class = $payload_args[3];
 
                     $valid_whitelist_commands = array('register', 'unregister');
                     if(!in_array($whitelist_command, $valid_whitelist_commands))

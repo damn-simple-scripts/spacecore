@@ -160,6 +160,14 @@ class PLUGIN_SYSTEM
                     $whitelist_user = $payload_args[2];
                     $whitelist_class = $payload_args[4];
 
+                    $valid_whitelist_commands = array('register', 'unregister');
+                    if(!in_array($whitelist_command, $valid_whitelist_commands))
+                    {
+                        $message = "<b>Error</b> Action '".$whitelist_command."' is not allowed by this plugin.\nAllowed are: ".join(", ", $valid_whitelist_commands);
+                        $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
+                        return false;
+                    }
+
                     if($this->object_broker->instance['api_routing']->acl_modify_list($whitelist_user, $whitelist_class, 'white', $whitelist_command))
                     {
                         $message = "<b>Success!</b>\n User $whitelist_user: $whitelist_class:white -> $whitelist_command";

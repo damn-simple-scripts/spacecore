@@ -160,6 +160,13 @@ class PLUGIN_SYSTEM
                     $whitelist_user = $payload_args[2];
                     $whitelist_class = $payload_args[3];
 
+                    if($whitelist_class == "")
+                    {
+                        $message = "<b>Error</b> you tried to whitelist the user for empty-string!";
+                        $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
+                        return false;
+                    }
+
                     $valid_whitelist_commands = array('register', 'unregister');
                     if(!in_array($whitelist_command, $valid_whitelist_commands))
                     {
@@ -199,6 +206,13 @@ class PLUGIN_SYSTEM
                     $blacklist_user = $payload_args[2];
                     $blacklist_class = $payload_args[3];
                     
+                    if($blacklist_class == "")
+                    {
+                        $message = "<b>Error</b> you tried to blacklist the user for empty-string!";
+                        $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
+                        return false;
+                    }
+
                     $valid_blacklist_commands = array('register', 'unregister');
                     if(!in_array($blacklist_command, $valid_blacklist_commands))
                     {

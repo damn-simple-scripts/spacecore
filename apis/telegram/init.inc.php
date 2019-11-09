@@ -26,7 +26,7 @@ class API_TELEGRAM
     }
 
 
-    public function send_message($target, $message)
+    public function send_message($target, $message, $inlineKB=null)
     {
         global $config;
 
@@ -36,6 +36,27 @@ class API_TELEGRAM
             'text'=>$message,
             'parse_mode'=>'HTML'
         ];
+
+        if($inlineKB != null)
+        {
+            $kb = array();
+
+            foreach($inlineKB as $r)
+            {
+                $row = array();
+
+                foreach($r as $text => $command)
+                {
+                    $button = array();
+                    $button['text'] = $text;
+                    $button['callback_data'] = $command;
+                    array_push($row, $button);
+                }
+                array_push($kb, $row);
+            }
+            $params['reply_markup'] = json_encode( ["inline_keyboard" => $kb ] );
+            error_log($this->classname . ":reply_markup=".$params['reply_markup']);
+        }
 
         // send request
         $ch = curl_init($config['api_endpoint'] . "sendMessage");

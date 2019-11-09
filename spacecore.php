@@ -111,6 +111,10 @@ else
             // Interpret text commands and route them to their registered classes
             $object_broker->instance['api_routing']->route_text();
         }
+        if (isset($GLOBALS['layer7_stanza']['callback_query']['data'])) {
+            // Interpret text commands and route them to their registered classes
+            $object_broker->instance['api_routing']->route_text();
+        }
 
     } else {
         // Invalid JSON encountered (for whatever reason, we don't care).

@@ -24,7 +24,7 @@ class PLUGIN_SYSTEM
         $this->object_broker->instance['api_routing']->helptext("system", "whoami", "Show user-related metadata");
         $this->object_broker->instance['api_routing']->helptext("system", "permissions", "List all permissions associated with the user");
         $this->object_broker->instance['api_routing']->helptext("system", "whitelist (register/remove) UID PLUGIN_NAME", "Add/remove a user to/from a plugin in whitelist mode");
-        $this->object_broker->instance['api_routing']->helptext("system", "blacklist (register/remove) UID (to/from) PLUGIN_NAME", "Add/remove a user to/from a plugin in blacklist mode");
+        $this->object_broker->instance['api_routing']->helptext("system", "blacklist (register/remove) UID PLUGIN_NAME", "Add/remove a user to/from a plugin in blacklist mode");
         $this->object_broker->instance['api_routing']->helptext("system", "help", "The information you're reading at the moment");
     }
 
@@ -152,7 +152,7 @@ class PLUGIN_SYSTEM
                 // add a user to a whitelist
                 if(isset($config['admins'][$senderid]))
                 {
-                    // Expected format: /system whitelist register <uid> to <class>
+                    // Expected format: /system whitelist register <uid> <class>
                     error_log($this->classname . ": ---$payload---");
 
                     $payload_args = explode(' ', $payload);
@@ -193,11 +193,20 @@ class PLUGIN_SYSTEM
                 // add a user to a blacklist
                 if(isset($config['admins'][$senderid]))
                 {
-                    // Expected format: /system blacklist register <uid> to <class>
+                    // Expected format: /system blacklist register <uid> <class>
                     $payload_args = explode(' ', $payload);
                     $blacklist_command = $payload_args[1];
                     $blacklist_user = $payload_args[2];
-                    $blacklist_class = $payload_args[4];
+                    $blacklist_class = $payload_args[3];
+                    
+                    $valid_blacklist_commands = array('register', 'unregister');
+                    if(!in_array($blacklist_command, $valid_blacklist_commands))
+                    {
+                        $message = "<b>Error</b> Action '".$blacklist_command."' is not allowed by this plugin.\nAllowed are: ".join(", ", $valid_blacklist_commands);
+                        $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
+                        return false;
+                    }
+
 
                     if($this->object_broker->instance['api_routing']->acl_modify_list($blacklist_user, $blacklist_class, 'black', $blacklist_command))
                     {

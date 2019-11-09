@@ -32,8 +32,23 @@ class API_ROUTING
 
     public function route_text()
     {
-        $message = $GLOBALS['layer7_stanza']['message']['text'];
-        $senderid = $GLOBALS['layer7_stanza']['message']['from']['id'];
+        $message = null;
+        $senderid = null;
+        if(isset($GLOBALS['layer7_stanza']['message']['text']))
+        {
+            $message = $GLOBALS['layer7_stanza']['message']['text'];
+            $senderid = $GLOBALS['layer7_stanza']['message']['from']['id'];
+        }else if(isset($GLOBALS['layer7_stanza']['callback_query']['data'])){
+            error_log($this->classname . ": convert from inline");
+            $message = $GLOBALS['layer7_stanza']['callback_query']['data'];
+            $senderid = $GLOBALS['layer7_stanza']['callback_query']['from']['id'];
+            $GLOBALS['layer7_stanza']['message']['text'] = $message;
+            $GLOBALS['layer7_stanza']['message']['from']['id'] = $senderid;
+            $GLOBALS['layer7_stanza']['message']['chat']['id'] = $senderid;
+        }else{
+            error_log($this->classname . ": MESSAGE COULD NOT BE PARSED");
+            return;
+        }
 
         if($message[0] == '/')
         {

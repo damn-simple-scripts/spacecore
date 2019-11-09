@@ -43,8 +43,8 @@ class API_ROUTING
             $message = $GLOBALS['layer7_stanza']['callback_query']['data'];
             $senderid = $GLOBALS['layer7_stanza']['callback_query']['from']['id'];
             $GLOBALS['layer7_stanza']['message']['text'] = $message;
-            $GLOBALS['layer7_stanza']['message']['from']['id'] = $senderid;
             $GLOBALS['layer7_stanza']['message']['chat']['id'] = $senderid;
+            $GLOBALS['layer7_stanza']['message']['from'] = $GLOBALS['layer7_stanza']['callback_query']['from'];
         }else{
             error_log($this->classname . ": MESSAGE COULD NOT BE PARSED");
             return;

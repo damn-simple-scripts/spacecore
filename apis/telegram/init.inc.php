@@ -57,12 +57,7 @@ class API_TELEGRAM
 
     public function delete_message($chat_id, $msg_id)
     {
-        // make sure that we're technically able to delete a message
-        if($chat_id > 0)
-        {
-            error_log($this->classname . ":deleteMessage: can not delete $msg_id @ $chat_id (not a channel)");
-            return;
-        }
+        global $config;
 
         // set parameters
         $params = [

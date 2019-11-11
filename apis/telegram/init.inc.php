@@ -25,11 +25,23 @@ class API_TELEGRAM
 
     }
 
-
-    public function send_message($target, $message)
+    private function call_curl($method, $params)
     {
         global $config;
 
+        $ch = curl_init($config['api_endpoint'] . $method);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, ($params));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }
+
+    public function send_message($target, $message)
+    {
         // set parameters
         $params = [
             'chat_id'=>$target,
@@ -38,15 +50,7 @@ class API_TELEGRAM
         ];
 
         // send request
-        $ch = curl_init($config['api_endpoint'] . "sendMessage");
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, ($params));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-
+        $result = $this->call_curl("sendMessage", $params);
         error_log($this->classname . ":sendMessage: $result");
     }
 
@@ -62,15 +66,7 @@ class API_TELEGRAM
         ];
 
         // send request
-        $ch = curl_init($config['api_endpoint'] . "deleteMessage");
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, ($params));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-
+        $result = $this->call_curl("deleteMessage", $params);
         error_log($this->classname . ":deleteMessage: $result");
     }
 
@@ -85,15 +81,7 @@ class API_TELEGRAM
         ];
 
         // send request
-        $ch = curl_init($config['api_endpoint'] . "getFile");
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, ($params));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-
+        $result = $this->call_curl("getFile", $params);
         $result_arr = json_decode($result, true);
 
         if($result_arr['ok'] == 'true')

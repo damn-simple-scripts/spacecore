@@ -214,9 +214,14 @@ class PLUGIN_PROCEDURE
                                       $GLOBALS['layer7_stanza']['message']['text'] = "/teardown closed";
                                       $this->object_broker->instance['api_routing']->route_text();
                                  }else{
-                                     $this->send_to_user("Sending /shutdown ...\n\ndid it work?", [ ["NO" => "/shutdown" ], ["YES" => "/teardown closed" ] ] );
                                      $GLOBALS['layer7_stanza']['message']['text'] = "/shutdown";
                                      $this->object_broker->instance['api_routing']->route_text();
+
+                                     $spacestate = $this->object_broker->instance['core_persist']->retrieve('heralding.state');
+                                     if(!$spacestate || $spacestate != 'closed')
+                                     {
+                                         $this->send_to_user("Sending /shutdown ...\n\ndid it work?", [ ["NO" => "/shutdown" ], ["YES" => "/teardown closed" ] ] );
+                                     }
                                  }
                              }
                         }

@@ -20,4 +20,6 @@ $config['error_log'] = "core.log";
 $config['webapi_level'] = 2;
 $config['webapi_token'] = '';
 
+$config['keysafe'] = "YOUR PIN";
+
 ?>

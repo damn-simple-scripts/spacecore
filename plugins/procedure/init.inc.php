@@ -18,9 +18,9 @@ class PLUGIN_PROCEDURE
         $object_broker->plugins[] = $this->classname;
         error_log($this->classname . ": starting up");
 
-        $this->object_broker->instance['api_routing']->register("bootup", $this->classname, "Procedure to start the space");
+        //$this->object_broker->instance['api_routing']->register("bootup", $this->classname, "Procedure to start the space");
         $this->object_broker->instance['api_routing']->register("teardown", $this->classname, "Procedure to shutdown the space");
-        $this->object_broker->instance['api_routing']->helptext("bootup", "", "Procedure to start the space");
+        //$this->object_broker->instance['api_routing']->helptext("bootup", "", "Procedure to start the space");
         $this->object_broker->instance['api_routing']->helptext("teardown", "", "Procedure to shutdown the space");
     }
 

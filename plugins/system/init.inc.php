@@ -152,7 +152,7 @@ class PLUGIN_SYSTEM
                 // add a user to a whitelist
                 if(isset($config['admins'][$senderid]))
                 {
-                    // Expected format: /system whitelist register <uid> <class>
+                    // Expected format: /system whitelist register <uid> to <class>
                     error_log($this->classname . ": ---$payload---");
 
                     $payload_args = explode(' ', $payload);
@@ -215,11 +215,11 @@ class PLUGIN_SYSTEM
                 // add a user to a blacklist
                 if(isset($config['admins'][$senderid]))
                 {
-                    // Expected format: /system blacklist register <uid> <class>
+                    // Expected format: /system blacklist register <uid> to <class>
                     $payload_args = explode(' ', $payload);
                     $blacklist_command = $payload_args[1];
                     $blacklist_user = $payload_args[2];
-                    $blacklist_class = $payload_args[3];
+                    $blacklist_class = $payload_args[4];
                     
                     if($blacklist_class == "")
                     {

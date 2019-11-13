@@ -110,6 +110,20 @@ class API_TELEGRAM
     }
 
 
+    public function send_coordinate($chat_id, $lat, $lon)
+    {
+        // set parameters
+        $params = [
+            'chat_id'=>$chat_id,
+            'latitude'=>$lat,
+            'longitude'=>$lon,
+        ];
+
+        // send request
+        $result = $this->call_curl("sendLocation", $params);
+        error_log($this->classname . ":sendLocation: $result");
+    }
+
     public function download_resource($file_id, $destination)
     {
         global $config;

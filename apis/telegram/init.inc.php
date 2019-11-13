@@ -24,7 +24,7 @@ class API_TELEGRAM
     {
 
     }
-
+    
     private function call_curl($method, $params)
     {
         global $config;

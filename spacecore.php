@@ -318,7 +318,12 @@ else
                 // -- that's the proper way of retrieving data, using SpaceAPI (https://spaceapi.io)
                 $spaceapi_data_filter['api'] = $spaceapi_data['api'];
                 $spaceapi_data_filter['space'] = $spaceapi_data['space'];
-                $spaceapi_data_filter[$_GET['filter']] = $spaceapi_data[$_GET['filter']];
+                if( array_key_exists( $_GET['filter'] , $spaceapi_data ) )
+                {
+                    $spaceapi_data_filter[$_GET['filter']] = $spaceapi_data[$_GET['filter']];
+                }else{
+                    $spaceapi_data_filter[$_GET['filter']] = "THIS KEY DOES NOT EXISTS!";
+                }
                 print json_encode($spaceapi_data_filter);
             }
             else {

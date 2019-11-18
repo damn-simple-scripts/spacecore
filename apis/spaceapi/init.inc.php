@@ -24,16 +24,8 @@ class API_SPACEAPI
 
     }
 
-    public function process_requests()
+    private function build_spaceapi_object()
     {
-        /* FIXME: Right now we're tapping into the data from the persistence module, but this is shitty in too many ways.
-        // The next step for this section will be to refactor this to ASK all registered plugins for public / private
-        // data to be exposed via plain GET/POST requests.
-        */
-
-        header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: *');
-
         // -- collect information that is available to unauthenticated sessions
         $spacestate = $this->object_broker->instance['core_persist']->retrieve('heralding.state');
         $spacestate_msg = $this->object_broker->instance['core_persist']->retrieve('heralding.msg');
@@ -215,6 +207,21 @@ class API_SPACEAPI
                 ]
             ]
         ];
+        return $spaceapi_data;
+    }
+
+
+    public function process_requests()
+    {
+        /* FIXME: Right now we're tapping into the data from the persistence module, but this is shitty in too many ways.
+        // The next step for this section will be to refactor this to ASK all registered plugins for public / private
+        // data to be exposed via plain GET/POST requests.
+        */
+
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+
+        $spaceapi_data = $this->build_spaceapi_object();
 
         // Let's deliver some data ...
         if(isset($_GET['token']) && strtolower($_GET['token']) == 'spaceapi') {

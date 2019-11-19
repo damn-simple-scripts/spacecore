@@ -9,6 +9,34 @@ class API_SPACEAPI
     private $object_broker;
     private $classname;
 
+    private $sensor_config = [
+        'temperature' => [
+            0 => [ 'id' => 'climate_serverroom', 'location' => 'Serverroom', 'unit' => '°C'],
+            1 => [ 'id' => 'climate_ballpit', 'location' => 'Ballpit', 'unit' => '°C'],
+            2 => [ 'id' => 'climate_lounge', 'location' => 'Lounge' , 'unit' => '°C']
+        ],
+        'humidity' => [
+            0 => [ 'id' => 'climate_serverroom', 'location' => 'Serverroom', 'unit' => '%', 'convert' => 'int'],
+            1 => [ 'id' => 'climate_ballpit', 'location' => 'Ballpit', 'unit' => '%', 'convert' => 'int'],
+            2 => [ 'id' => 'climate_lounge', 'location' => 'Lounge', 'unit' => '%', 'convert' => 'int']
+        ],
+        'pressure' => [
+            0 => [ 'id' => 'climate_serverroom', 'location' => 'Serverroom', 'unit' => 'hPA', 
+                   'multiply' => (1.0 / 100.0), 'convert' => 'int'],
+            1 => [ 'id' => 'climate_ballpit', 'location' => 'Ballpit', 'unit' => 'hPA', 
+                   'multiply' => (1.0 / 100.0), 'convert' => 'int'],
+            2 => [ 'id' => 'climate_lounge', 'location' => 'Lounge', 'unit' => 'hPA', 
+                   'multiply' => (1.0 / 100.0), 'convert' => 'int']
+        ],
+        'radiation' => [
+            'beta_gamma' => [ 'id' => 'radiation', 'property' => 'cpm', 'location' => 'Lounge', 'unit' => 'cpm', 
+                   'extra' => [ 'conversion_factor' =>  0.0057 , 'name' => 'Primary Radiation Sensor', 
+                                'description' => 'Tube: SBM-20, Logic: MightyOhm v1.0'
+                   ]
+            ]
+        ]
+    ];
+
     public function __construct($object_broker)
     {
         $this->classname = strtolower(static::class);
@@ -22,6 +50,91 @@ class API_SPACEAPI
     public function __destruct()
     {
 
+    }
+
+    private function read_mqtt_file($file_name="mqtt.data")
+    {
+        if(!file_exists($file_name))
+        {
+            return NULL;
+        }
+        $mqtt_data = file_get_contents($file_name);
+        $mqtt_json = json_decode($mqtt_data, TRUE);
+        if($mqtt_json == NULL)
+        {
+            error_log("JSON ERROR: ".$file_name." was not valid JSON");
+            return NULL;
+        }
+
+        $config = $this->sensor_config;
+        $result = array();
+
+        foreach(array_keys($config) as $category)
+        {
+            $cat_result = array();
+            foreach(array_keys($config[$category]) as $numbering)
+            {
+                $elem = $config[$category][$numbering];
+                if(isset($mqtt_json[$elem['id']]))
+                {
+                    $mqtt_elem = $mqtt_json[$elem['id']];
+                    $prop = ( isset($elem['property']) ? $elem['property'] : $category );
+                    if( array_key_exists($prop, $mqtt_elem) )
+                    {
+                        $sens_data = $mqtt_elem[$prop][0]['value'];
+                        $sens_data = floatval($sens_data);
+                        if( isset($elem['multiply']) )
+                        {
+                            $sens_data *= $elem['multiply'];
+                        }
+                        if( isset($elem['convert']) )
+                        {
+                            switch($elem['convert']) {
+                                case "int":
+                                    $sens_data = intval($sens_data);
+                                    break;
+                                case "str":
+                                    $sens_data = strval($sens_data);
+                                    break;
+                                case "bool":
+                                    $sens_data = boolval($sens_data);
+                                    break;
+                                case "float":
+                                default:
+                                    $sens_data = floatval($sens_data);
+                                    break;
+                            }
+                        }
+                        $measurement = array();
+                        $measurement['value'] = $sens_data;
+                        if( isset($elem['unit']) ){ $measurement['unit'] = $elem['unit']; }
+                        if( isset($elem['location']) ){ $measurement['location'] = $elem['location']; }
+                        if( isset($elem['extra']) )
+                        {
+                            foreach($elem['extra'] as $key => $value)
+                            {
+                                $measurement[$key] = $value;
+                            }
+                        }
+                        if(!is_numeric($numbering))
+                        {
+                            $measurement = [ 0 => $measurement ];
+                        }
+                        $cat_result[$numbering] = $measurement;
+                    }
+                }
+            }
+            if( count($cat_result) > 0 )
+            {
+                $result[$category] = $cat_result;
+            }
+        }
+        if( count($result) > 0 )
+        {
+            return $result;
+        }else{
+            return NULL;
+        }
     }
 
     private function build_spaceapi_object()
@@ -57,48 +170,7 @@ class API_SPACEAPI
             $traffic_light = 'blinking';
         }
 
-        $mqtt_data = file_get_contents("mqtt.data");
-        $mqtt_json = json_decode($mqtt_data, TRUE);
-
-        // FIXME: HARDCODED MADNESS!
-        // FIXME: We should find a way to interpret that stuff dynamically
-
-        if(isset($mqtt_json['climate_serverroom'])) {
-            $server_humidity = str_replace('.', ',', $mqtt_json['climate_serverroom']['humidity'][0]['value']);
-            $server_pressure = str_replace('.', ',', $mqtt_json['climate_serverroom']['pressure'][0]['value'] / 100);
-            $server_temperature = str_replace('.', ',', $mqtt_json['climate_serverroom']['temperature'][0]['value']);
-        }
-        else {
-            $server_humidity = $server_pressure = $server_temperature = 0;
-        }
-
-        if(isset($mqtt_json['climate_lounge'])) {
-            $lounge_humidity = str_replace('.', ',', $mqtt_json['climate_lounge']['humidity'][0]['value']);
-            $lounge_pressure = str_replace('.', ',', $mqtt_json['climate_lounge']['pressure'][0]['value'] / 100);
-            $lounge_temperature = str_replace('.', ',', $mqtt_json['climate_lounge']['temperature'][0]['value']);
-        }
-        else {
-            $lounge_humidity = $lounge_pressure = $lounge_temperature = 0;
-        }
-
-        if(isset($mqtt_json['climate_ballpit'])) {
-            $ballpit_humidity = str_replace('.', ',', $mqtt_json['climate_ballpit']['humidity'][0]['value']);
-            $ballpit_pressure = str_replace('.', ',', $mqtt_json['climate_ballpit']['pressure'][0]['value'] / 100);
-            $ballpit_temperature = str_replace('.', ',', $mqtt_json['climate_ballpit']['temperature'][0]['value']);
-        }
-        else {
-            $ballpit_humidity = $ballpit_temperature = $ballpit_pressure = 0;
-        }
-
-        if(isset($mqtt_json['radiation'])) {
-            $lounge_radiation_cpm = $mqtt_json['radiation']['cpm'][0]['value'];
-            $lounge_radiation_usv = $mqtt_json['radiation']['usv'][0]['value'];
-        }
-        else {
-            $lounge_radiation_cpm = $lounge_radiation_usv = 0;
-        }
-
-        // FIXME: MORE HARDCODED MADNESS!
+       // FIXME: MORE HARDCODED MADNESS!
         // FIXME: we should get that done somewhere else
 
         $spaceapi_data = [
@@ -140,73 +212,14 @@ class API_SPACEAPI
             ],
             'projects' => [
                 'https://segvault.space/wiki/'
-            ],
-            'sensors' => [
-                'temperature' => [
-                  0 => [
-                      'value'           => (float) str_replace(',', '.', $server_temperature),
-                      'unit'            => '°C',
-                      'location'        => 'Serverroom'
-                  ],
-                  1 => [
-                      'value'           => (float) str_replace(',', '.', $ballpit_temperature),
-                      'unit'            => '°C',
-                      'location'        => 'Ballpit'
-                  ],
-                  2 => [
-                      'value'           => (float) str_replace(',', '.', $lounge_temperature),
-                      'unit'            => '°C',
-                      'location'        => 'Lounge'
-                  ],
-                ],
-                'humidity' => [
-                    0 => [
-                        'value'           => (int) $server_humidity,
-                        'unit'            => '%',
-                        'location'        => 'Serverroom'
-                    ],
-                    1 => [
-                        'value'           => (int) $ballpit_humidity,
-                        'unit'            => '%',
-                        'location'        => 'Ballpit'
-                    ],
-                    2 => [
-                        'value'           => (int) $lounge_humidity,
-                        'unit'            => '%',
-                        'location'        => 'Lounge'
-                    ],
-                ],
-                'pressure' => [
-                    0 => [
-                        'value'           => (int) $server_pressure,
-                        'unit'            => 'hPA',
-                        'location'        => 'Serverroom'
-                    ],
-                    1 => [
-                        'value'           => (int) $ballpit_pressure,
-                        'unit'            => 'hPA',
-                        'location'        => 'Ballpit'
-                    ],
-                    2 => [
-                        'value'           => (int) $lounge_pressure,
-                        'unit'            => 'hPA',
-                        'location'        => 'Lounge'
-                    ],
-                ],
-                'radiation' => [
-                    'beta_gamma' => [
-                        0 => [
-                            'value'             => 0 + $lounge_radiation_cpm,
-                            'unit'              => "cpm",
-                            'conversion_factor' => 0.0057,
-                            'location'          => "Lounge",
-                            'name'              => "Primary Radiation Sensor",
-                            'description'       => "Tube: SBM-20, Logic: MightyOhm v1.0"
-                        ]
-                    ]
-                ]
             ]
         ];
+
+        $sensors = $this->read_mqtt_file();
+        if($sensors != NULL)
+        {
+            $spaceapi_data['sensors'] = $sensors;
+        }
         return $spaceapi_data;
     }
 

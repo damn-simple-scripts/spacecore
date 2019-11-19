@@ -137,43 +137,9 @@ class API_SPACEAPI
         }
     }
 
-    private function build_spaceapi_object()
+    private function get_static_data() // minimal spaceapi data
     {
-        // -- collect information that is available to unauthenticated sessions
-        $spacestate = $this->object_broker->instance['core_persist']->retrieve('heralding.state');
-        $spacestate_msg = $this->object_broker->instance['core_persist']->retrieve('heralding.msg');
-        $spacestate_lastchange_ts = $this->object_broker->instance['core_persist']->retrieve('heralding.lastchange.ts');
-        $spacestate_lastchange_gecos = $this->object_broker->instance['core_persist']->retrieve('heralding.lastchange.gecos');
-
-        if($spacestate == 'open') {
-            $spaceapi_state_message = "Public. $spacestate_msg";
-            $spaceapi_state_icon_open = "http://www.segvault.space/segvault_logo_green.png";
-            $spaceapi_state_icon_closed = "http://www.segvault.space/segvault_logo_red.png";
-            $traffic_light = 'green';
-        }
-        elseif($spacestate == 'membersonly') {
-            $spaceapi_state_message = "Members only. $spacestate_msg";
-            $spaceapi_state_icon_open = "http://www.segvault.space/segvault_logo_yellow.png";
-            $spaceapi_state_icon_closed = "http://www.segvault.space/segvault_logo_red.png";
-            $traffic_light = 'yellow';
-        }
-        elseif($spacestate == 'closed') {
-            $spaceapi_state_message = "See you soon";
-            $spaceapi_state_icon_open = "http://www.segvault.space/segvault_logo_green.png";
-            $spaceapi_state_icon_closed = "http://www.segvault.space/segvault_logo_red.png";
-            $traffic_light = 'red';
-        }
-        else {
-            $spaceapi_state_message = "Could not retrieve space state. Halp!";
-            $spaceapi_state_icon_open = "http://www.segvault.space/segvault_logo_yellow.png";
-            $spaceapi_state_icon_closed = "http://www.segvault.space/segvault_logo_yellow.png";
-            $traffic_light = 'blinking';
-        }
-
-       // FIXME: MORE HARDCODED MADNESS!
-        // FIXME: we should get that done somewhere else
-
-        $spaceapi_data = [
+        return [
             'api'        => "0.13",
             'space'      => "Segmentation Vault",
             'logo'       => "https://segvault.space/logo.png",
@@ -182,31 +148,26 @@ class API_SPACEAPI
                 'address'           => "Segmentation Vault, Kremser Gasse 11, 3100 St. Poelten, Austria",
                 'lat'               => 48.2050255,
                 'lon'               => 15.6221177
-                ],
-            'spacefed' => [
-                'spacenet'          => false,
-                'spacesaml'         => false,
-                'spacephone'        => false
-            ],
-            'state' => [
-                'open'              => ($spacestate == 'closed' ? false : true),
-                'lastchange'        => (int) $spacestate_lastchange_ts,
-                'trigger_person'    => $spacestate_lastchange_gecos,
-                'message'           => $spaceapi_state_message,
-                'icon'              => [
-                    'open'          => $spaceapi_state_icon_open,
-                    'closed'        => $spaceapi_state_icon_closed
-                ],
             ],
             'contact' => [
                 'facebook'          => "https://www.facebook.com/segvault/",
                 'twitter'           => "@segvaultspace",
                 'email'             => "info@segvault.space"
             ],
+       ];
+    }
+
+    private function addidtional_static_data()
+    {
+        return [
+            'spacefed' => [
+                'spacenet'          => false,
+                'spacesaml'         => false,
+                'spacephone'        => false
+            ],
             'issue_report_channels' => [
                 'email'
             ],
-            'ext_traffic_light'     => $traffic_light,
             'cache' => [
                 'schedule'          => "m.30"
             ],
@@ -214,7 +175,76 @@ class API_SPACEAPI
                 'https://segvault.space/wiki/'
             ]
         ];
+    }
 
+    private function get_traffic_light()
+    {
+        $cp = $this->object_broker->instance['core_persist'];
+        $spacestate = $cp->retrieve('heralding.state');
+        switch($spacestate)
+        {
+            case 'open':
+                return 'green';
+            case 'membersonly':
+                return 'yellow';
+            case 'closed':
+                return 'red';
+            default:
+                return 'blinking';
+        }
+    }
+
+    private function get_state()
+    {
+        $cp = $this->object_broker->instance['core_persist'];
+        $spacestate = $cp->retrieve('heralding.state');
+        $spacestate_msg = $cp->retrieve('heralding.msg');
+        $spacestate_lastchange_ts = $cp->retrieve('heralding.lastchange.ts');
+        $spacestate_lastchange_gecos = $cp->retrieve('heralding.lastchange.gecos');
+
+        $spaceapi_state_icon_open = "http://www.segvault.space/segvault_logo_green.png";
+        $spaceapi_state_icon_closed = "http://www.segvault.space/segvault_logo_red.png";
+
+        switch($spacestate)
+        {
+            case 'open':
+                $spaceapi_state_message = "Public. $spacestate_msg";
+                break;
+            case 'membersonly':
+                $spaceapi_state_message = "Members only. $spacestate_msg";
+                $spaceapi_state_icon_open = "http://www.segvault.space/segvault_logo_yellow.png";
+                break;
+            case 'closed':
+                $spaceapi_state_message = "See you soon";
+                break;
+            default:
+                $spaceapi_state_message = "Could not retrieve space state. Halp!";
+                $spaceapi_state_icon_open = "http://www.segvault.space/segvault_logo_yellow.png";
+                $spaceapi_state_icon_closed = "http://www.segvault.space/segvault_logo_yellow.png";
+                error_log("SPACEAPI: Could not retrieve space state. Halp!");
+        }
+
+        return [
+            'open'              => ($spacestate == 'closed' ? false : true),
+            'lastchange'        => (int) $spacestate_lastchange_ts,
+            'trigger_person'    => $spacestate_lastchange_gecos,
+            'message'           => $spaceapi_state_message,
+            'icon'              => [
+                'open'          => $spaceapi_state_icon_open,
+                'closed'        => $spaceapi_state_icon_closed
+            ]
+        ];
+    }
+
+    private function build_spaceapi_object()
+    {
+        $spaceapi_data = $this->get_static_data();
+        $spaceapi_data['state'] = $this->get_state();
+        $spaceapi_data['ext_traffic_light'] = $this->get_traffic_light();
+        foreach($this->addidtional_static_data() as $key => $value)
+        {
+            $spaceapi_data[$key] = $value;
+        }
         $sensors = $this->read_mqtt_file();
         if($sensors != NULL)
         {
@@ -234,30 +264,36 @@ class API_SPACEAPI
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
 
-        $spaceapi_data = $this->build_spaceapi_object();
-
         // Let's deliver some data ...
         if(isset($_GET['token']) && strtolower($_GET['token']) == 'spaceapi') {
             if(isset($_GET['filter']) && $_GET['filter'] != "") {
                 // -- that's the proper way of retrieving data, using SpaceAPI (https://spaceapi.io)
-                $spaceapi_data_filter['api'] = $spaceapi_data['api'];
-                $spaceapi_data_filter['space'] = $spaceapi_data['space'];
-                if( array_key_exists( $_GET['filter'] , $spaceapi_data ) )
+                $_f = $_GET['filter'];
+                if($_f == 'ext_traffic_light') // make the common case fast
                 {
-                    $spaceapi_data_filter[$_GET['filter']] = $spaceapi_data[$_GET['filter']];
+                    $spaceapi_data = $this->get_static_data();
+                    $spaceapi_data['ext_traffic_light'] = $this->get_traffic_light();
+                    print json_encode($spaceapi_data);
+                    return;
+                }
+                $spaceapi_data = $this->build_spaceapi_object();
+                $spaceapi_data_filter = $this->get_static_data();
+                if( array_key_exists( $_f , $spaceapi_data ) )
+                {
+                    $spaceapi_data_filter[$_f] = $spaceapi_data[$_f];
                 }else{
-                    $spaceapi_data_filter[$_GET['filter']] = "THIS KEY DOES NOT EXISTS!";
+                    $spaceapi_data_filter[$_f] = "THIS KEY DOES NOT EXISTS!";
                 }
                 print json_encode($spaceapi_data_filter);
             }
             else {
                 // -- that's the proper way of retrieving data, using SpaceAPI (https://spaceapi.io)
-                print json_encode($spaceapi_data);
+                print json_encode($this->build_spaceapi_object());
             }
-
         }
         else {
             // -- that's the deprecated way, which I left here for Clemens in order to let him migrate his code
+            $spacestate = $this->object_broker->instance['core_persist']->retrieve('heralding.state');
             $private_array = [];
             $public_array = [];
 

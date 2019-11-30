@@ -296,6 +296,7 @@ class API_SPACEAPI
             $spacestate = $this->object_broker->instance['core_persist']->retrieve('heralding.state');
             $private_array = [];
             $public_array = [];
+            global $config;
 
             $public_array['spacecore_api'] = $config['webapi_level'];
             $public_array['spacestate'] = ($spacestate == 'open' ? 'open' : 'closed');

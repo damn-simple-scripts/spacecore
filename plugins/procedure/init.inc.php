@@ -18,9 +18,7 @@ class PLUGIN_PROCEDURE
         $object_broker->plugins[] = $this->classname;
         error_log($this->classname . ": starting up");
 
-        //$this->object_broker->instance['api_routing']->register("bootup", $this->classname, "Procedure to start the space");
         $this->object_broker->instance['api_routing']->register("teardown", $this->classname, "Procedure to shutdown the space");
-        //$this->object_broker->instance['api_routing']->helptext("bootup", "", "Procedure to start the space");
         $this->object_broker->instance['api_routing']->helptext("teardown", "", "Procedure to shutdown the space");
     }
 
@@ -125,7 +123,7 @@ class PLUGIN_PROCEDURE
                         $this->send_to_user("Refill fridges", [ [ "refilled" => "/teardown refilled" ] ]);
                         break;
                     case "refilled":
-                        $this->send_to_user("Are enough bottles in stock?\nif not notify: notify in keymembers group and tag @creolis\n\nSee: http://segvault.space/wiki/doku.php?id=internal:prozesse#getraenkelieferung \n\nRequirements according to documentation (by 2019-11-05):\n\n- 2 Kisten Club Mate\n- 2 Kisten Bier\n- 1 Kiste Mate Granat\n- 1 Kiste Mate Winter\n- 2 Kisten Tirola Kola\n- 1 Kiste Makava\n- 1/2 Karton ChariTea", [ [ "checked or notified" => "/teardown stock_checked" ] ]);
+                        $this->send_to_user("Are enough bottles in stock?\nif not: notify in keymembers group and tag @creolis\n\nSee: http://segvault.space/wiki/doku.php?id=internal:prozesse#getraenkelieferung \n\nRequirements according to documentation (by 2019-11-05):\n\n- 2 Kisten Club Mate\n- 2 Kisten Bier\n- 1 Kiste Mate Granat\n- 1 Kiste Mate Winter\n- 2 Kisten Tirola Kola\n- 1 Kiste Makava\n- 1/2 Karton ChariTea", [ [ "checked or notified" => "/teardown stock_checked" ] ]);
                         break;
                     case "stock_checked":
                         $this->send_to_user("Check Fridge for soon spoiled products", [ [ "Checked" => "/teardown fridge_checked" ] ]);
@@ -152,7 +150,7 @@ class PLUGIN_PROCEDURE
                         $this->send_to_user("Turn off the amplifier of the PA system\n(Computer power supply under the amplifier)", [ [ "is off" => "/teardown amplifier_off" ] ]);
                         break;
                     case "amplifier_off":
-                        $this->send_to_user("Turn off stand-allown-lamps and chain of lights", [ [ "lamps off" => "/teardown lamps_off" ] ]);
+                        $this->send_to_user("Turn off stand-alone-lamps, lightstrips and the lava lamp", [ [ "lamps off" => "/teardown lamps_off" ] ]);
                         break;
                     case "lamps_off":
                         $this->send_to_user("Turn off the light in storage room, book shelf, ...", [ [ "lights are out" => "/teardown lights_out" ] ]);
@@ -165,14 +163,25 @@ class PLUGIN_PROCEDURE
                         break;
                     case "rooms_dark":
                         global $config;
-                        if( isset($config['keysafe']) && $herald_ok)
+                        if($herald_ok)
                         {
-                            $msg_id = $this->send_to_user("Reminder: ".$config['keysafe'], null);
-                            $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked ".$msg_id ] ]);
-                            $this->object_broker->instance['core_persist']->store('procedure.msg_id', $msg_id);
+                            if(isset($config['keysafe']))
+                            {
+                                $msg_id = $this->send_to_user("Reminder: ".$config['keysafe'], null);
+                                $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked ".$msg_id ] ]);
+                                $this->object_broker->instance['core_persist']->store('procedure.msg_id', $msg_id);
+                            }else{
+                                $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked"] ]);
+                            }
+                        }else{
+                            $spaceownergecos = $this->object_broker->instance['core_persist']->retrieve('heralding.lastchange.gecos');
+                            if($spaceownergecos)
+                            {
+                                $this->send_to_user("Ask ".$spaceownergecos." to lock the inner door!");
+                            }else{
+                                $this->send_to_user("Usually at this point the keymember is asked to close the inner door\nit seems you are not a keymember...");
+                            }
                         }
-                        $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked"] ]);
-
                         break;
                     case "locked":
                         $msg_id = $this->object_broker->instance['core_persist']->retrieve('procedure.msg_id');                          

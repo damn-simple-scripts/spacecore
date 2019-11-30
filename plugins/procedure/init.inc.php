@@ -150,7 +150,7 @@ class PLUGIN_PROCEDURE
                         $this->send_to_user("Turn off the amplifier of the PA system\n(Computer power supply under the amplifier)", [ [ "is off" => "/teardown amplifier_off" ] ]);
                         break;
                     case "amplifier_off":
-                        $this->send_to_user("Turn off stand-allown-lamps and chain of lights", [ [ "lamps off" => "/teardown lamps_off" ] ]);
+                        $this->send_to_user("Turn off stand-alone-lamps, lightstrips and the lava lamp", [ [ "lamps off" => "/teardown lamps_off" ] ]);
                         break;
                     case "lamps_off":
                         $this->send_to_user("Turn off the light in storage room, book shelf, ...", [ [ "lights are out" => "/teardown lights_out" ] ]);

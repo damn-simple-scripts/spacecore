@@ -22,10 +22,16 @@ $classes = array_filter(glob('core/*'), 'is_dir');
 foreach($classes as $class_src)
 {
     $class_dir = basename($class_src);
-    include_once('core/' . $class_dir . '/init.inc.php');
-    $core_classname = 'CORE_'.strtoupper($class_dir);
-    $object_broker->instance['core_' . $class_dir] = new $core_classname($object_broker);
-    error_log("class $core_classname loaded");
+    $path = 'core/' . $class_dir . '/init.inc.php';
+    if(file_exists($path))
+    {
+        include_once($path);
+        $core_classname = 'CORE_'.strtoupper($class_dir);
+        $object_broker->instance['core_' . $class_dir] = new $core_classname($object_broker);
+        error_log("class $core_classname loaded");
+    }else{
+        error_log("Directory for core $plugin_classname exists, but no 'init.inc.php' file was found");
+    }
 }
 
 
@@ -57,7 +63,7 @@ foreach($plugins as $plugin_src)
     $path = 'plugins/' . $plugin_dir . '/init.inc.php';
     if(file_exists($path))
     {
-        include_once('plugins/' . $plugin_dir . '/init.inc.php');
+        include_once($path);
         $plugin_classname = 'PLUGIN_'.strtoupper($plugin_dir);
         $object_broker->instance['plugin_' . $plugin_dir] = new $plugin_classname($object_broker);
         error_log("class $plugin_classname loaded");

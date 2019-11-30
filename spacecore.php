@@ -34,10 +34,18 @@ $apis = array_filter(glob('apis/*'), 'is_dir');
 foreach($apis as $api_src)
 {
     $api_dir = basename($api_src);
-    include_once('apis/' . $api_dir . '/init.inc.php');
-    $api_classname = 'API_'.strtoupper($api_dir);
-    $object_broker->instance['api_' . $api_dir] = new $api_classname($object_broker);
-    error_log("class $api_classname loaded");
+    $path = 'apis/' . $api_dir . '/init.inc.php';
+    if(file_exists($path))
+    {
+        include_once($path);
+        $api_classname = 'API_'.strtoupper($api_dir);
+        $object_broker->instance['api_' . $api_dir] = new $api_classname($object_broker);
+        error_log("class $api_classname loaded");
+    }
+    else
+    {
+        error_log("Directory for class $api_classname exists, but no 'init.inc.php' file was found");
+    }
 }
 
 

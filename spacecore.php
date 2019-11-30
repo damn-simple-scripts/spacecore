@@ -322,7 +322,7 @@ else
                 {
                     $spaceapi_data_filter[$_GET['filter']] = $spaceapi_data[$_GET['filter']];
                 }else{
-                    $spaceapi_data_filter[$_GET['filter']] = "THIS KEY DOES NOT EXISTS!";
+                    $spaceapi_data_filter[$_GET['filter']] = "THIS KEY DOES NOT EXIST!";
                 }
                 print json_encode($spaceapi_data_filter);
             }

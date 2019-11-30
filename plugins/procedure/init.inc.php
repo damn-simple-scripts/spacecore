@@ -123,7 +123,7 @@ class PLUGIN_PROCEDURE
                         $this->send_to_user("Refill fridges", [ [ "refilled" => "/teardown refilled" ] ]);
                         break;
                     case "refilled":
-                        $this->send_to_user("Are enough bottles in stock?\nif not notify: notify in keymembers group and tag @creolis\n\nSee: http://segvault.space/wiki/doku.php?id=internal:prozesse#getraenkelieferung \n\nRequirements according to documentation (by 2019-11-05):\n\n- 2 Kisten Club Mate\n- 2 Kisten Bier\n- 1 Kiste Mate Granat\n- 1 Kiste Mate Winter\n- 2 Kisten Tirola Kola\n- 1 Kiste Makava\n- 1/2 Karton ChariTea", [ [ "checked or notified" => "/teardown stock_checked" ] ]);
+                        $this->send_to_user("Are enough bottles in stock?\nif not: notify in keymembers group and tag @creolis\n\nSee: http://segvault.space/wiki/doku.php?id=internal:prozesse#getraenkelieferung \n\nRequirements according to documentation (by 2019-11-05):\n\n- 2 Kisten Club Mate\n- 2 Kisten Bier\n- 1 Kiste Mate Granat\n- 1 Kiste Mate Winter\n- 2 Kisten Tirola Kola\n- 1 Kiste Makava\n- 1/2 Karton ChariTea", [ [ "checked or notified" => "/teardown stock_checked" ] ]);
                         break;
                     case "stock_checked":
                         $this->send_to_user("Check Fridge for soon spoiled products", [ [ "Checked" => "/teardown fridge_checked" ] ]);

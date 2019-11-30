@@ -163,15 +163,24 @@ class PLUGIN_PROCEDURE
                         break;
                     case "rooms_dark":
                         global $config;
-                        if( isset($config['keysafe']) && $herald_ok)
+                        if($herald_ok)
                         {
-                            $msg_id = $this->send_to_user("Reminder: ".$config['keysafe'], null);
-                            $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked ".$msg_id ] ]);
-                            $this->object_broker->instance['core_persist']->store('procedure.msg_id', $msg_id);
-                        }
-                        else
-                        {
-                            $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked"] ]);
+                            if(isset($config['keysafe']))
+                            {
+                                $msg_id = $this->send_to_user("Reminder: ".$config['keysafe'], null);
+                                $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked ".$msg_id ] ]);
+                                $this->object_broker->instance['core_persist']->store('procedure.msg_id', $msg_id);
+                            }else{
+                                $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked"] ]);
+                            }
+                        }else{
+                            $spaceownergecos = $this->object_broker->instance['core_persist']->retrieve('heralding.lastchange.gecos');
+                            if($spaceownergecos)
+                            {
+                                $this->send_to_user("Ask ".$spaceownergecos." to lock the inner door!");
+                            }else{
+                                $this->send_to_user("Usually at this point the keymember is asked to close the inner door\nit seems you are not a keymember...");
+                            }
                         }
                         break;
                     case "locked":

@@ -169,8 +169,10 @@ class PLUGIN_PROCEDURE
                             $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked ".$msg_id ] ]);
                             $this->object_broker->instance['core_persist']->store('procedure.msg_id', $msg_id);
                         }
-                        $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked"] ]);
-
+                        else
+                        {
+                            $this->send_to_user("Lock inner space door!", [ [ "locked" => "/teardown locked"] ]);
+                        }
                         break;
                     case "locked":
                         $msg_id = $this->object_broker->instance['core_persist']->retrieve('procedure.msg_id');                          

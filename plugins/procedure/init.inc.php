@@ -84,7 +84,7 @@ class PLUGIN_PROCEDURE
                              {
                                   if($herald_ok)
                                   {
-                                      $this->send_to_user("<b>Optional</b> do you want to change the state?", [ [ "yes: memberonly" => "/membersonly" ] , [ "yes: closed" => "/shutdown" ] ] );
+                                      $this->send_to_user("<b>Optional</b> do you want to change the state?", [ [ "yes: memberonly" => "/membersonly after teardown completion" ] , [ "yes: closed" => "/shutdown" ] ] );
                                   }else{
                                       $spaceownergecos = $this->object_broker->instance['core_persist']->retrieve('heralding.lastchange.gecos');
                                       if($spaceownergecos)

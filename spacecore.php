@@ -54,10 +54,16 @@ $plugins = array_filter(glob('plugins/*'), 'is_dir');
 foreach($plugins as $plugin_src)
 {
     $plugin_dir = basename($plugin_src);
-    include_once('plugins/' . $plugin_dir . '/init.inc.php');
-    $plugin_classname = 'PLUGIN_'.strtoupper($plugin_dir);
-    $object_broker->instance['plugin_' . $plugin_dir] = new $plugin_classname($object_broker);
-    error_log("class $plugin_classname loaded");
+    $path = 'plugins/' . $plugin_dir . '/init.inc.php';
+    if(file_exists($path))
+    {
+        include_once('plugins/' . $plugin_dir . '/init.inc.php');
+        $plugin_classname = 'PLUGIN_'.strtoupper($plugin_dir);
+        $object_broker->instance['plugin_' . $plugin_dir] = new $plugin_classname($object_broker);
+        error_log("class $plugin_classname loaded");
+    }else{
+        error_log("Directory for plugin $plugin_classname exists, but no 'init.inc.php' file was found");
+    }
 }
 
 // determine invocation method: CLI or Serverbased?

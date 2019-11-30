@@ -175,6 +175,21 @@ class PLUGIN_SYSTEM
                         return false;
                     }
 
+                    if($whitelist_class == "")
+                    {
+                        $message = "<b>Error</b> you tried to whitelist the user for empty-string!";
+                        $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
+                        return false;
+                    }
+
+                    $valid_whitelist_commands = array('register', 'unregister');
+                    if(!in_array($whitelist_command, $valid_whitelist_commands))
+                    {
+                        $message = "<b>Error</b> Action '".$whitelist_command."' is not allowed by this plugin.\nAllowed are: ".join(", ", $valid_whitelist_commands);
+                        $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
+                        return false;
+                    }
+
                     if($this->object_broker->instance['api_routing']->acl_modify_list($whitelist_user, $whitelist_class, 'white', $whitelist_command))
                     {
                         $message = "<b>Success!</b>\n User $whitelist_user: $whitelist_class:white -> $whitelist_command";

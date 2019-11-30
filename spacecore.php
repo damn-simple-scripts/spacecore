@@ -34,10 +34,18 @@ $apis = array_filter(glob('apis/*'), 'is_dir');
 foreach($apis as $api_src)
 {
     $api_dir = basename($api_src);
-    include_once('apis/' . $api_dir . '/init.inc.php');
-    $api_classname = 'API_'.strtoupper($api_dir);
-    $object_broker->instance['api_' . $api_dir] = new $api_classname($object_broker);
-    error_log("class $api_classname loaded");
+    $path = 'apis/' . $api_dir . '/init.inc.php';
+    if(file_exists($path))
+    {
+        include_once($path);
+        $api_classname = 'API_'.strtoupper($api_dir);
+        $object_broker->instance['api_' . $api_dir] = new $api_classname($object_broker);
+        error_log("class $api_classname loaded");
+    }
+    else
+    {
+        error_log("Directory for class $api_classname exists, but no 'init.inc.php' file was found");
+    }
 }
 
 
@@ -46,10 +54,16 @@ $plugins = array_filter(glob('plugins/*'), 'is_dir');
 foreach($plugins as $plugin_src)
 {
     $plugin_dir = basename($plugin_src);
-    include_once('plugins/' . $plugin_dir . '/init.inc.php');
-    $plugin_classname = 'PLUGIN_'.strtoupper($plugin_dir);
-    $object_broker->instance['plugin_' . $plugin_dir] = new $plugin_classname($object_broker);
-    error_log("class $plugin_classname loaded");
+    $path = 'plugins/' . $plugin_dir . '/init.inc.php';
+    if(file_exists($path))
+    {
+        include_once('plugins/' . $plugin_dir . '/init.inc.php');
+        $plugin_classname = 'PLUGIN_'.strtoupper($plugin_dir);
+        $object_broker->instance['plugin_' . $plugin_dir] = new $plugin_classname($object_broker);
+        error_log("class $plugin_classname loaded");
+    }else{
+        error_log("Directory for plugin $plugin_classname exists, but no 'init.inc.php' file was found");
+    }
 }
 
 // determine invocation method: CLI or Serverbased?
@@ -318,7 +332,12 @@ else
                 // -- that's the proper way of retrieving data, using SpaceAPI (https://spaceapi.io)
                 $spaceapi_data_filter['api'] = $spaceapi_data['api'];
                 $spaceapi_data_filter['space'] = $spaceapi_data['space'];
-                $spaceapi_data_filter[$_GET['filter']] = $spaceapi_data[$_GET['filter']];
+                if( array_key_exists( $_GET['filter'] , $spaceapi_data ) )
+                {
+                    $spaceapi_data_filter[$_GET['filter']] = $spaceapi_data[$_GET['filter']];
+                }else{
+                    $spaceapi_data_filter[$_GET['filter']] = "THIS KEY DOES NOT EXIST!";
+                }
                 print json_encode($spaceapi_data_filter);
             }
             else {

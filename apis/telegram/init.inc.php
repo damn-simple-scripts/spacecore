@@ -96,8 +96,6 @@ class API_TELEGRAM
 
     public function delete_message($chat_id, $msg_id)
     {
-        global $config;
-
         // set parameters
         $params = [
             'chat_id'=>$chat_id,

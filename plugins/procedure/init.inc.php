@@ -123,10 +123,14 @@ class PLUGIN_PROCEDURE
                         $this->send_to_user("Clear Tables", [ [ "all clear" => "/teardown tables_clear".$tok_string ] ]);
                         break;
                     case "tables_clear":
-                        $this->send_to_user("Swipe Floor if needed", [ [ "Swiped" => "/teardown swiped".$tok_string , "SKIP" => "/teardown not_swiped".$tok_string ] ]);
+                        $this->send_to_user("Swipe Floor if needed", 
+                        [
+                            ["SKIP" => "/teardown not_swiped".$tok_string],
+                            [ "Swiped Dry" => "/teardown swiped_dry".$tok_string , "Swiped Wet" => "/teardown swiped_wet".$tok_string ] 
+                        ]);
                         break;
-                    case "swiped":
-                        $swipes = $this->object_broker->instance['core_persist']->retrieve('procedure.swipes');
+                    case "swiped_dry":
+                        $swipes = $this->object_broker->instance['core_persist']->retrieve('procedure.swipes.dry');
                         if(!$swipes)
                         {
                             $swipes = 1;
@@ -134,9 +138,24 @@ class PLUGIN_PROCEDURE
                         {
                             $swipes += 1;
                         }
-                        $this->send_to_user("Thank you!\n\nSwipes so far: ".$swipes);
-                        $this->object_broker->instance['core_persist']->store('procedure.swipe', $swipes);
-                        // FALL THROUGH
+                        $this->send_to_user("Thank you!\n\nSwipes (dry) so far: ".$swipes);
+                        $this->object_broker->instance['core_persist']->store('procedure.swipes.dry', $swipes);
+                        $this->send_to_user("Align the chairs", [ [ "aligned" => "/teardown chairs_aligned".$tok_string ] ]);
+                        break;
+                    case "swiped_wet":
+                        $swipes = $this->object_broker->instance['core_persist']->retrieve('procedure.swipes.wet');
+                        if(!$swipes)
+                        {
+                            $swipes = 1;
+                        }else
+                        {
+                            $swipes += 1;
+                        }
+                        $this->send_to_user("Thank you!\n\nSwipes (wet) so far: ".$swipes);
+                        $this->object_broker->instance['core_persist']->store('procedure.swipes.wet', $swipes);
+                        $this->send_to_user("Align the chairs", [ [ "aligned" => "/teardown chairs_aligned".$tok_string ] ]);
+                        break;
+
                     case "not_swiped":
                         $this->send_to_user("Align the chairs", [ [ "aligned" => "/teardown chairs_aligned".$tok_string ] ]);
                         break;

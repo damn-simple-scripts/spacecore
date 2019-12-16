@@ -123,10 +123,32 @@ class PLUGIN_PROCEDURE
                         $this->send_to_user("Clear Tables", [ [ "all clear" => "/teardown tables_clear".$tok_string ] ]);
                         break;
                     case "tables_clear":
-                        $this->send_to_user("Swipe Floor if needed", 
+                        $last_swipe_dry = $this->object_broker->instance['core_persist']->retrieve('procedure.swipes.dry.last');
+                        $last_swipe_wet = $this->object_broker->instance['core_persist']->retrieve('procedure.swipes.wet.last');
+
+                        $info_str = "";
+                        if($last_swipe_dry || $last_swipe_wet)
+                        {
+                            $tz = new DateTimeZone('Europe/Vienna');
+                            $_now = new DateTime(null, $tz);
+                            if($last_swipe_dry)
+                            {
+                                $_parsed = new DateTime($last_swipe_dry, $tz);
+                                $_d = (int) $_parsed->diff($_now)->format('%r%a');
+                                $info_str .= "days since last sweep: ".$_d."\n";
+                            }
+                            if($last_swipe_wet)
+                            {
+                                $_parsed = new DateTime($last_swipe_wet, $tz);
+                                $_d = (int) $_parsed->diff($_now)->format('%r%a');
+                                $info_str .= "days since last wash up: ".$_d."\n";
+                            }
+                        }
+
+                        $this->send_to_user("Swipe Floor if needed".(empty($info_str) ? "" : "\n\n".$info_str ), 
                         [
                             ["SKIP" => "/teardown not_swiped".$tok_string],
-                            [ "Swiped Dry" => "/teardown swiped_dry".$tok_string , "Swiped Wet" => "/teardown swiped_wet".$tok_string ] 
+                            [ "Swiped Dry" => "/teardown swiped_dry".$tok_string , "Washed up" => "/teardown swiped_wet".$tok_string ] 
                         ]);
                         break;
                     case "swiped_dry":
@@ -140,6 +162,13 @@ class PLUGIN_PROCEDURE
                         }
                         $this->send_to_user("Thank you!\n\nSwipes (dry) so far: ".$swipes);
                         $this->object_broker->instance['core_persist']->store('procedure.swipes.dry', $swipes);
+
+                        $tz = new DateTimeZone('Europe/Vienna');
+                        $_now = new DateTime(null, $tz);
+                        $_time = $_now->format(DATE_ATOM);
+                        $this->object_broker->instance['core_persist']->store('procedure.swipes.dry.last', $_time);
+
+
                         $this->send_to_user("Align the chairs", [ [ "aligned" => "/teardown chairs_aligned".$tok_string ] ]);
                         break;
                     case "swiped_wet":
@@ -153,6 +182,12 @@ class PLUGIN_PROCEDURE
                         }
                         $this->send_to_user("Thank you!\n\nSwipes (wet) so far: ".$swipes);
                         $this->object_broker->instance['core_persist']->store('procedure.swipes.wet', $swipes);
+
+                        $tz = new DateTimeZone('Europe/Vienna');
+                        $_now = new DateTime(null, $tz);
+                        $_time = $_now->format(DATE_ATOM);
+                        $this->object_broker->instance['core_persist']->store('procedure.swipes.wet.last', $_time);
+
                         $this->send_to_user("Align the chairs", [ [ "aligned" => "/teardown chairs_aligned".$tok_string ] ]);
                         break;
 

@@ -10,7 +10,7 @@ class PLUGIN_TOKEN
     private $classname;
     const ACL_MODE = 'none';    // white, black, none
 
-    private $random_characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-§%';
+    private $random_characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-';
     private $random_length = 10;
     private $kill_tokens_sec = 60*60*24; // 1 day
     private $token_cache = NULL;

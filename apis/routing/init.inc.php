@@ -200,12 +200,12 @@ class API_ROUTING
             $acl_assoc = json_decode($acl, true);
             if(isset($acl_assoc[$userid]))
             {
-                error_log($this->classname . ": user $userid is listed on $list for class $classname since EPOCH:" . $acl_assoc[$userid]);
+                debug_log($this->classname . ": user $userid is listed on $list for class $classname since EPOCH:" . $acl_assoc[$userid]);
                 return $acl_assoc[$userid];
             }
             else
             {
-                error_log($this->classname . ": user $userid is not listed on $list for class $classname");
+                debug_log($this->classname . ": user $userid is not listed on $list for class $classname");
                 return false;
             }
         }

@@ -47,6 +47,16 @@ class PLUGIN_SANITIZE
         elseif($last_update_id >= $current_update_id)
         {
             error_log($this->classname . ":dedup: possible duplicate -> ignoring");
+            if(
+                array_key_exists('message', $GLOBALS['layer7_stanza']) && 
+                array_key_exists('text', $GLOBALS['layer7_stanza']['message'])
+            ){
+                if($GLOBALS['layer7_stanza']['message']['text'] == '/reset_dedup')
+                {
+                    error_log("reset_dedup");
+                    $this->object_broker->instance['core_persist']->store('update_id', 1);
+                }
+            }
             exit;
         }
         else

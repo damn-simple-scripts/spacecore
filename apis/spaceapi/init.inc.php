@@ -43,7 +43,7 @@ class API_SPACEAPI
 
         $this->object_broker = $object_broker;
         $object_broker->apis[] = 'api_spaceapi';
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
     }
 
 

@@ -16,7 +16,7 @@ class PLUGIN_SYSTEM
 
         $this->object_broker = $object_broker;
         $object_broker->plugins[] = $this->classname;
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
 
         $this->object_broker->instance['api_routing']->register("system", $this->classname, "System related commands");
         $this->object_broker->instance['api_routing']->helptext("system", "", "System related commands");
@@ -43,7 +43,7 @@ class PLUGIN_SYSTEM
 
     public function process($trigger)
     {
-        error_log($this->classname . ": processing trigger $trigger");
+        debug_log($this->classname . ": processing trigger $trigger");
         global $config;
 
         $senderid = $GLOBALS['layer7_stanza']['message']['from']['id'];
@@ -134,7 +134,7 @@ class PLUGIN_SYSTEM
                 }
                 $message .= "\n\n";
 
-                error_log("SENDING: " . $message);
+                debug_log("SENDING: " . $message);
                 $this->object_broker->instance['api_telegram']->send_message($senderid, $message);
                 break;
 
@@ -153,7 +153,7 @@ class PLUGIN_SYSTEM
                 if(isset($config['admins'][$senderid]))
                 {
                     // Expected format: /system whitelist register <uid> to <class>
-                    error_log($this->classname . ": ---$payload---");
+                    debug_log($this->classname . ": ---$payload---");
 
                     $payload_args = explode(' ', $payload);
                     $whitelist_command = $payload_args[1];

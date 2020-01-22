@@ -24,7 +24,7 @@ class PLUGIN_ANTISPAM
 
         $this->object_broker = $object_broker;
         $object_broker->plugins[] = $this->classname;
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
 
     }
 
@@ -46,7 +46,7 @@ class PLUGIN_ANTISPAM
 
     public function router_preprocess_text()
     {
-        error_log($this->classname . ": preprocessing message");
+        debug_log($this->classname . ": preprocessing message");
 
         $chatid = $GLOBALS['layer7_stanza']['message']['chat']['id'];
         $msgid = $GLOBALS['layer7_stanza']['message']['message_id'];

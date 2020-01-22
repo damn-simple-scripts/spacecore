@@ -16,7 +16,7 @@ class CORE_PERSIST
 
         $this->object_broker = $object_broker;
         $object_broker->apis[] = $this->classname;
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
 
         $this->setup();
     }

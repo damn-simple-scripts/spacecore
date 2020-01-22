@@ -10,8 +10,30 @@ error_reporting(E_ALL);
 ini_set('display_errors', 'on');
 ini_set("error_log", $config['error_log']);
 
-error_log("");
-error_log("WAKEUP");
+
+
+global $_print_debugs;
+$_print_debugs = false;
+if(array_key_exists('suppress_debug', $config))
+{
+    $_print_debugs = !( $config['suppress_debug'] );
+}else{
+    error_log("'suppress_debug' is not defined - defaulting to 'true', consider defining it explicit in the config file!");
+    $_print_debugs = false;
+}
+
+function debug_log($msg)
+{
+    global $_print_debugs;
+    if($_print_debugs)
+    {
+        error_log($msg);
+    }
+}
+
+debug_log("");
+debug_log("WAKEUP");
+
 
 include_once('object_broker.inc.php');
 $object_broker = new OBJECT_BROKER();
@@ -32,7 +54,7 @@ foreach(array_keys($load_order) as $load_item)
                $classname = strtoupper($prefix).'_'.strtoupper($dir_base);
                $index = $prefix.'_' . $dir_base;
                $object_broker->instance[$index] = new $classname($object_broker);
-               error_log("$classname loaded as $index");
+               debug_log("$classname loaded as $index");
            }
        }else{
            error_log("Directory for $load_item $plugin_classname exists, but no 'init.inc.php' file was found");
@@ -44,7 +66,7 @@ foreach(array_keys($load_order) as $load_item)
 if(php_sapi_name() == 'cli')
 {
     // fired up via command line. It's cron time.
-    error_log("CLI MODE: assuming scheduled invocation");
+    debug_log("CLI MODE: assuming scheduled invocation");
 
     // Run through all plugins and execute any housekeeping steps
     foreach ($object_broker->plugins as $registered_plugin) {
@@ -65,7 +87,7 @@ else
     // right now we are not sure if the stuff we received was valid JSON..
     if (json_last_error() === JSON_ERROR_NONE && $layer6_stanza != NULL) {
         // Valid JSON encountered. Treat this as a telegram message
-        error_log("telegram:receiveMessage: VALID JSON DECODED: '$layer6_stanza'");
+        debug_log("telegram:receiveMessage: VALID JSON DECODED: '$layer6_stanza'");
 
         // Is the sender legit?
         if (!isset($_GET['token']) || (isset($_GET['token']) && $_GET['token'] != $config['bot_token'])) {
@@ -105,12 +127,12 @@ else
         }
 
     } else {
-				$object_broker->instance['api_spaceapi']->process_requests();
+        $object_broker->instance['api_spaceapi']->process_requests();
 
         // Invalid JSON encountered (for whatever reason, we don't care).
         // Treat this as plain GET/POST requests
 
-        error_log("getpost:receivePostBody: '$layer6_stanza'");
+        debug_log("getpost:receivePostBody: '$layer6_stanza'");
     }
 }
 

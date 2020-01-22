@@ -16,7 +16,7 @@ class API_TELEGRAM
 
         $this->object_broker = $object_broker;
         $object_broker->apis[] = 'api_telegram';
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
     }
 
 
@@ -67,17 +67,17 @@ class API_TELEGRAM
                 array_push($kb, $row);
             }
             $params['reply_markup'] = json_encode( ["inline_keyboard" => $kb ] );
-            error_log($this->classname . ":reply_markup=".$params['reply_markup']);
+            debug_log($this->classname . ":reply_markup=".$params['reply_markup']);
         }
 
         // send request
         $result = $this->call_curl("sendMessage", $params);
-        error_log($this->classname . ":sendMessage: $result");
+        debug_log($this->classname . ":sendMessage: $result");
         
         $result_arr = json_decode($result, true);
         if($result_arr == null)
         {
-            error_log($this->classname . ":sendMessage: response was null");
+            debug_log($this->classname . ":sendMessage: response was null");
             return false;
         }
         if($result_arr['ok'] == 'true')
@@ -104,7 +104,7 @@ class API_TELEGRAM
 
         // send request
         $result = $this->call_curl("deleteMessage", $params);
-        error_log($this->classname . ":deleteMessage: $result");
+        debug_log($this->classname . ":deleteMessage: $result");
     }
 
 
@@ -119,7 +119,7 @@ class API_TELEGRAM
 
         // send request
         $result = $this->call_curl("sendLocation", $params);
-        error_log($this->classname . ":sendLocation: $result");
+        debug_log($this->classname . ":sendLocation: $result");
     }
 
     public function download_resource($file_id, $destination)
@@ -143,7 +143,7 @@ class API_TELEGRAM
             if(in_array($resource_extension, $config['allowed_photo_extensions']))
             {
                 file_put_contents($destination . '.' . $resource_extension, file_get_contents($resource_location));
-                error_log($this->classname . ":getFile: $file_id saved to $destination . '.' . $resource_extension");
+                debug_log($this->classname . ":getFile: $file_id saved to $destination . '.' . $resource_extension");
             }
             else
             {

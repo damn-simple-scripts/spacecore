@@ -24,7 +24,7 @@ class PLUGIN_TOKEN
 
         $this->object_broker = $object_broker;
         $object_broker->plugins[] = $this->classname;
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
     }
 
 
@@ -148,7 +148,7 @@ class PLUGIN_TOKEN
 
     public function router_housekeeping(){
         $this->token_cache_init();
-        error_log("token cache consists of ".count($this->token_cache)." elements");
+        debug_log("token cache consists of ".count($this->token_cache)." elements");
         $this->kill_invalid_tokens();
         $this->kill_outdated_tokens();
 

@@ -16,7 +16,7 @@ class PLUGIN_HERALDING
 
         $this->object_broker = $object_broker;
         $object_broker->plugins[] = $this->classname;
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
 
         $this->object_broker->instance['api_routing']->register("startup", $this->classname, "Boot the space for all audiences");
         $this->object_broker->instance['api_routing']->register("membersonly", $this->classname, "Boot the space for members only");
@@ -43,7 +43,7 @@ class PLUGIN_HERALDING
     {
         global $config;
 
-        error_log($this->classname . ": processing trigger $trigger");
+        debug_log($this->classname . ": processing trigger $trigger");
 
         $chatid = $GLOBALS['layer7_stanza']['message']['chat']['id'];
         $senderid = $GLOBALS['layer7_stanza']['message']['from']['id'];

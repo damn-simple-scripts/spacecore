@@ -17,7 +17,7 @@ class PLUGIN_SANITIZE
 
         $this->object_broker = $object_broker;
         $object_broker->plugins[] = $this->classname;
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
     }
 
 
@@ -38,7 +38,7 @@ class PLUGIN_SANITIZE
 
         $current_update_id = $GLOBALS['layer7_stanza']['update_id'];
         $last_update_id = $this->object_broker->instance['core_persist']->retrieve('update_id');
-        error_log($this->classname . ":dedup: $last_update_id vs $current_update_id");
+        debug_log($this->classname . ":dedup: $last_update_id vs $current_update_id");
         if(!$last_update_id)
         {
             error_log($this->classname . ":dedup: no update id in persistent store -> bootstrapping");

@@ -16,7 +16,7 @@ class PLUGIN_PROCEDURE
 
         $this->object_broker = $object_broker;
         $object_broker->plugins[] = $this->classname;
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
 
         $this->object_broker->instance['api_routing']->register("teardown", $this->classname, "Procedure to shutdown the space");
         $this->object_broker->instance['api_routing']->helptext("teardown", "", "Procedure to shutdown the space");
@@ -48,14 +48,14 @@ class PLUGIN_PROCEDURE
 
     public function process($trigger)
     {
-        error_log($this->classname . ": processing trigger $trigger");
+        debug_log($this->classname . ": processing trigger $trigger");
 
         $chatid = $GLOBALS['layer7_stanza']['message']['chat']['id'];
         $senderid = $GLOBALS['layer7_stanza']['message']['from']['id'];
 
         $payload = str_replace('/' . $trigger, '', $GLOBALS['layer7_stanza']['message']['text']);
         $payload = trim($payload);
-        error_log($this->classname . ": payload \"$payload\"");
+        debug_log($this->classname . ": payload \"$payload\"");
 
         $herald_ok = $this->object_broker->instance['api_routing']->acl_check_list($senderid, "plugin_heralding", "white");
 
@@ -87,7 +87,7 @@ class PLUGIN_PROCEDURE
                 if($_use_tok && $payload !== "start")
                 {
                     $last_elem = array_slice($payload_arr, -1)[0];
-                    error_log("last_elem=".$last_elem);
+                    debug_log("last_elem=".$last_elem);
                     $res = $this->object_broker->instance['plugin_token']->consume_token($last_elem);
                     if(!$res)
                     {

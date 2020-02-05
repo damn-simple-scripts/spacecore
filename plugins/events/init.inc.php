@@ -17,7 +17,7 @@ class PLUGIN_EVENTS
 
         $this->object_broker = $object_broker;
         $object_broker->plugins[] = $this->classname;
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
     }
 
 
@@ -40,7 +40,7 @@ class PLUGIN_EVENTS
         // the photo array is ordered by filesize (ascending)
         // so the largest file is at the end of the array
         $photo_data = end($GLOBALS['layer7_stanza']['message']['photo']);
-        error_log($this->classname . ": found image locator" . $photo_data['file_id'] . " (size:" . $photo_data['file_size'] . ")");
+        debug_log($this->classname . ": found image locator" . $photo_data['file_id'] . " (size:" . $photo_data['file_size'] . ")");
 
         // we need an area to dump the files
         if(!is_dir('photos')) mkdir('photos');

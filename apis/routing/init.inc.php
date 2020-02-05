@@ -17,7 +17,7 @@ class API_ROUTING
 
         $this->object_broker = $object_broker;
         $object_broker->apis[] = $this->classname;
-        error_log($this->classname .  ": starting up");
+        debug_log($this->classname .  ": starting up");
 
         $this->hooks = [];
         $this->helptexts = [];
@@ -39,7 +39,7 @@ class API_ROUTING
             $message = $GLOBALS['layer7_stanza']['message']['text'];
             $senderid = $GLOBALS['layer7_stanza']['message']['from']['id'];
         }else if(isset($GLOBALS['layer7_stanza']['callback_query']['data'])){
-            error_log($this->classname . ": convert from inline");
+            debug_log($this->classname . ": convert from inline");
             $message = $GLOBALS['layer7_stanza']['callback_query']['data'];
             $senderid = $GLOBALS['layer7_stanza']['callback_query']['from']['id'];
             $GLOBALS['layer7_stanza']['message']['text'] = $message;
@@ -52,10 +52,10 @@ class API_ROUTING
 
         if($message[0] == '/')
         {
-            error_log($this->classname . ": command prefix detected");
+            debug_log($this->classname . ": command prefix detected");
 
             $trigger = ltrim(explode(' ', trim($message))[0], '/');
-            error_log($this->classname . ": command trigger detected: $trigger");
+            debug_log($this->classname . ": command trigger detected: $trigger");
 
             $classname = $this->resolve($trigger);
             if ($classname)
@@ -108,7 +108,7 @@ class API_ROUTING
                 {
                     if (method_exists($this->object_broker->instance[$classname], 'process'))
                     {
-                        error_log($this->classname . ": routing request to $classname");
+                        debug_log($this->classname . ": routing request to $classname");
                         $this->object_broker->instance[$classname]->process($trigger);
                     }
                     else
@@ -133,7 +133,7 @@ class API_ROUTING
         else
         {
             // that's no command. This branch could facilitate some chatbot feature.
-            error_log($this->classname . ": no chatmode available yet --> ignoring");
+            debug_log($this->classname . ": no chatmode available yet --> ignoring");
         }
     }
 
@@ -141,13 +141,13 @@ class API_ROUTING
     public function register($trigger, $classname, $description = NULL)
     {
         $this->hooks[$trigger] = $classname;
-        error_log($this->classname . ": registered class $classname on trigger $trigger");
+        debug_log($this->classname . ": registered class $classname on trigger $trigger");
     }
 
     public function helptext($trigger, $modifier, $description = NULL)
     {
         $this->helptexts[$trigger][$modifier] = $description;
-        error_log($this->classname . ": registered helptext for trigger $trigger");
+        debug_log($this->classname . ": registered helptext for trigger $trigger");
     }
 
     public function resolve($trigger)
@@ -155,7 +155,7 @@ class API_ROUTING
         if(isset($this->hooks[$trigger]))
         {
             $classname = $this->hooks[$trigger];
-            error_log($this->classname . ": resolved class $classname from trigger $trigger");
+            debug_log($this->classname . ": resolved class $classname from trigger $trigger");
             return $classname;
         }
         else
@@ -200,12 +200,12 @@ class API_ROUTING
             $acl_assoc = json_decode($acl, true);
             if(isset($acl_assoc[$userid]))
             {
-                error_log($this->classname . ": user $userid is listed on $list for class $classname since EPOCH:" . $acl_assoc[$userid]);
+                debug_log($this->classname . ": user $userid is listed on $list for class $classname since EPOCH:" . $acl_assoc[$userid]);
                 return $acl_assoc[$userid];
             }
             else
             {
-                error_log($this->classname . ": user $userid is not listed on $list for class $classname");
+                debug_log($this->classname . ": user $userid is not listed on $list for class $classname");
                 return false;
             }
         }

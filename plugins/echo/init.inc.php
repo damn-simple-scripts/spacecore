@@ -16,7 +16,7 @@ class PLUGIN_ECHO
 
         $this->object_broker = $object_broker;
         $object_broker->plugins[] = $this->classname;
-        error_log($this->classname . ": starting up");
+        debug_log($this->classname . ": starting up");
 
         $this->object_broker->instance['api_routing']->register("echo", $this->classname, "Repeats the received message body back to the current channel");
         $this->object_broker->instance['api_routing']->register("whisper", $this->classname, "Repeats the received message body to the sender via PM");
@@ -39,7 +39,7 @@ class PLUGIN_ECHO
 
     public function process($trigger)
     {
-        error_log($this->classname . ": processing trigger $trigger");
+        debug_log($this->classname . ": processing trigger $trigger");
 
         $chatid = $GLOBALS['layer7_stanza']['message']['chat']['id'];
         $senderid = $GLOBALS['layer7_stanza']['message']['from']['id'];

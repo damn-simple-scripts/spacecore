@@ -10,65 +10,55 @@ error_reporting(E_ALL);
 ini_set('display_errors', 'on');
 ini_set("error_log", $config['error_log']);
 
-error_log("");
-error_log("WAKEUP");
+
+
+global $_print_debugs;
+$_print_debugs = false;
+if(array_key_exists('suppress_debug', $config))
+{
+    $_print_debugs = !( $config['suppress_debug'] );
+}else{
+    error_log("'suppress_debug' is not defined - defaulting to 'true', consider defining it explicit in the config file!");
+    $_print_debugs = false;
+}
+
+function debug_log($msg)
+{
+    global $_print_debugs;
+    if($_print_debugs)
+    {
+        error_log($msg);
+    }
+}
+
+debug_log("");
+debug_log("WAKEUP");
+
 
 include_once('object_broker.inc.php');
 $object_broker = new OBJECT_BROKER();
 
-
-// Instantiate core classes first
-$classes = array_filter(glob('core/*'), 'is_dir');
-foreach($classes as $class_src)
+$load_order = ['core' => 'core', 'apis' => 'api', 'plugins' => 'plugin']; // dir => prefix
+foreach(array_keys($load_order) as $load_item)
 {
-    $class_dir = basename($class_src);
-    $path = 'core/' . $class_dir . '/init.inc.php';
-    if(file_exists($path))
+    $sub_dirs = array_filter(glob($load_item.'/*'), 'is_dir');
+    foreach($sub_dirs as $dir)
     {
-        include_once($path);
-        $core_classname = 'CORE_'.strtoupper($class_dir);
-        $object_broker->instance['core_' . $class_dir] = new $core_classname($object_broker);
-        error_log("class $core_classname loaded");
-    }else{
-        error_log("Directory for core $plugin_classname exists, but no 'init.inc.php' file was found");
-    }
-}
-
-
-// Instantiate apis
-$apis = array_filter(glob('apis/*'), 'is_dir');
-foreach($apis as $api_src)
-{
-    $api_dir = basename($api_src);
-    $path = 'apis/' . $api_dir . '/init.inc.php';
-    if(file_exists($path))
-    {
-        include_once($path);
-        $api_classname = 'API_'.strtoupper($api_dir);
-        $object_broker->instance['api_' . $api_dir] = new $api_classname($object_broker);
-        error_log("class $api_classname loaded");
-    }
-    else
-    {
-        error_log("Directory for class $api_classname exists, but no 'init.inc.php' file was found");
-    }
-}
-
-
-// Instantiate plugins
-$plugins = array_filter(glob('plugins/*'), 'is_dir');
-foreach($plugins as $plugin_src)
-{
-    $plugin_dir = basename($plugin_src);
-    $path = 'plugins/' . $plugin_dir . '/init.inc.php';
-    if(file_exists($path))
-    {
-        include_once($path);
-        $plugin_classname = 'PLUGIN_'.strtoupper($plugin_dir);
-        $object_broker->instance['plugin_' . $plugin_dir] = new $plugin_classname($object_broker);
-        error_log("class $plugin_classname loaded");
-    }else{
-        error_log("Directory for plugin $plugin_classname exists, but no 'init.inc.php' file was found");
+       $dir_base = basename($dir);
+       $path = $load_item.'/'.$dir_base.'/init.inc.php';
+       if(file_exists($path))
+       {
+           if( include_once($path) )
+           {
+               $prefix = $load_order[$load_item];
+               $classname = strtoupper($prefix).'_'.strtoupper($dir_base);
+               $index = $prefix.'_' . $dir_base;
+               $object_broker->instance[$index] = new $classname($object_broker);
+               debug_log("$classname loaded as $index");
+           }
+       }else{
+           error_log("Directory for $load_item $plugin_classname exists, but no 'init.inc.php' file was found");
+       }
     }
 }
 
@@ -76,7 +66,7 @@ foreach($plugins as $plugin_src)
 if(php_sapi_name() == 'cli')
 {
     // fired up via command line. It's cron time.
-    error_log("CLI MODE: assuming scheduled invocation");
+    debug_log("CLI MODE: assuming scheduled invocation");
 
     // Run through all plugins and execute any housekeeping steps
     foreach ($object_broker->plugins as $registered_plugin) {
@@ -97,7 +87,7 @@ else
     // right now we are not sure if the stuff we received was valid JSON..
     if (json_last_error() === JSON_ERROR_NONE && $layer6_stanza != NULL) {
         // Valid JSON encountered. Treat this as a telegram message
-        error_log("telegram:receiveMessage: VALID JSON DECODED: '$layer6_stanza'");
+        debug_log("telegram:receiveMessage: VALID JSON DECODED: '$layer6_stanza'");
 
         // Is the sender legit?
         if (!isset($_GET['token']) || (isset($_GET['token']) && $_GET['token'] != $config['bot_token'])) {
@@ -137,12 +127,12 @@ else
         }
 
     } else {
-				$object_broker->instance['api_spaceapi']->process_requests();
+        $object_broker->instance['api_spaceapi']->process_requests();
 
         // Invalid JSON encountered (for whatever reason, we don't care).
         // Treat this as plain GET/POST requests
 
-        error_log("getpost:receivePostBody: '$layer6_stanza'");
+        debug_log("getpost:receivePostBody: '$layer6_stanza'");
     }
 }
 

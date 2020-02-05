@@ -17,6 +17,7 @@ $config['keymemberChannelID'] = "";
 $config['admins'] = array('' => '');
 
 $config['error_log'] = "core.log";
+$config['suppress_debug'] = true;
 $config['webapi_level'] = 2;
 $config['webapi_token'] = '';
 

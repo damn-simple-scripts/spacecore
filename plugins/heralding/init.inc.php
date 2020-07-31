@@ -85,7 +85,7 @@ class PLUGIN_HERALDING
 
         }
 
-        switch($trigger)
+        switch(strtolower($trigger))
         {
             case "startup":
 

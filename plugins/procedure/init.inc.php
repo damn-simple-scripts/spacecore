@@ -69,7 +69,7 @@ class PLUGIN_PROCEDURE
         }
         $tok_string = ($_use_tok ? " ".$_tok : "");
 
-        switch($trigger)
+        switch(strtolower($trigger))
         {
             case "bootup":
                 break;

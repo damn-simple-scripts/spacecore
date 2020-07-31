@@ -58,6 +58,20 @@ class API_ROUTING
             debug_log($this->classname . ": command trigger detected: $trigger");
 
             $classname = $this->resolve($trigger);
+						if ( ! $classname )
+						{
+							$_chr_pos = strpos($trigger, '@');
+							if ( $_chr_pos !== false )
+							{
+								$_sub_trigger = substr($trigger, 0, $_chr_pos);
+								$classname = $this->resolve($_sub_trigger);
+								if($classname)
+								{
+									$trigger = $_sub_trigger;
+								}
+							}
+						}
+
             if ($classname)
             {
                 $access_permitted = false;

@@ -24,7 +24,6 @@ class PLUGIN_INFORM
         $this->object_broker->instance['api_routing']->helptext("inform", "nonext (default if set)", "Bot will NOT inform user only about the next opening");
         $this->object_broker->instance['api_routing']->helptext("inform", "all", "Bot will inform user about the next openings");
         $this->object_broker->instance['api_routing']->helptext("inform", "noall", "Bot will NOT inform user about the next openings");
-        $this->object_broker->instance['api_routing']->helptext("inform", "status", "Bot will inform you about your notifications");
     }
 
 

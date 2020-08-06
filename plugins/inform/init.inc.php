@@ -86,17 +86,24 @@ class PLUGIN_INFORM
 
 			$keys = ['next', 'all'];
 
+			debug_log($this->classname . " perform cleanup");
+			$changed = false;
+
 			foreach($keys as $k){
 				$uids_new[$k] = array();
-				if(array_key_exists($k, $uids){
+				if(array_key_exists($k, $uids)){
 					foreach($uids[$k] as $uid){
 						if($this->check_state($uid, 'next')){
 							array_push($uids_new['next'], $uid);
+						}else{
+							$changed = true;
 						}
 					}
 				}
 			}
-			$this->store_user_ids($uids_new);
+			if($changed){
+				$this->store_user_ids($uids_new);
+			}
 		}
 
 		public function process_next($senderid, $message=null){

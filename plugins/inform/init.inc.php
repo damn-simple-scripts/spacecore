@@ -80,6 +80,25 @@ class PLUGIN_INFORM
 			}
 		}
 
+		public function router_housekeeping(){
+			$uids = $this->seen_user_ids();
+			$uids_new = array();
+
+			$keys = ['next', 'all'];
+
+			foreach($keys as $k){
+				$uids_new[$k] = array();
+				if(array_key_exists($k, $uids){
+					foreach($uids[$k] as $uid){
+						if($this->check_state($uid, 'next')){
+							array_push($uids_new['next'], $uid);
+						}
+					}
+				}
+			}
+			$this->store_user_ids($uids_new);
+		}
+
 		public function process_next($senderid, $message=null){
 			if($this->check_state($senderid, 'next')){
 				$key = $this->get_persist_key($senderid);

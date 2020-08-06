@@ -60,6 +60,11 @@ class PLUGIN_HERALDING
         $privateChannel = $config['privateChannelID'];
         $keymemberChannel = $config['keymemberChannelID'];
 
+				$do_inform = false;
+				if(array_key_exists('plugin_inform' , $this->object_broker->instance)){
+					$do_inform = true;
+				}
+
         if($chatid < 0)
         {
 						debug_log($this->classname . ": WAS GROUP MESSAGE");
@@ -117,6 +122,12 @@ class PLUGIN_HERALDING
                         $this->object_broker->instance['api_telegram']->send_message($publicChannel, $message);
                         $this->object_broker->instance['core_persist']->store('heralding.msg', 'No estimated shutdown time');
                     }
+										if($do_inform)
+										{
+											debug_log($this->classname . ": Boradcast...");
+											$this->object_broker->instance['plugin_inform']->broadcast_next($message);
+											$this->object_broker->instance['plugin_inform']->broadcast_all($message);
+										}
 
                     // Persist the state
                     $this->object_broker->instance['core_persist']->store('heralding.state', 'open');
